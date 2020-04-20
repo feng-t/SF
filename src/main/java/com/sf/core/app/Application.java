@@ -10,19 +10,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Application {
     private Map<Class,Object> Objs=new ConcurrentHashMap<>(10);
-    protected static void run(Class<?> aClass, String[] args) throws Exception {
+    public static void run(Class<?> aClass, String[] args) throws Exception {
         //TODO 命令模式,处理传过来的参数
         //TODO 加载class
         new Application().run(aClass);
     }
 
-    public void run(Class<?> aClass) throws Exception {
+    private void run(Class<?> aClass) throws Exception {
         MyClassLoader myClassLoader = new MyClassLoader(aClass);
         myClassLoader.parsing(this::precessAnnotation);
     }
 
     /**
-     * 处理 注解
+     * TODO 处理 注解
      * @param aClass
      * @throws IllegalAccessException
      * @throws InstantiationException

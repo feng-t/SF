@@ -9,7 +9,7 @@ import java.util.HashMap;
 public class MyClassLoader extends ClassLoader {
     private static HashMap<String, byte[]> objs = new HashMap<>();
     private Class<?> application;
-    private static String prefix = "";
+    private static String prefix;
 
 
     protected MyClassLoader(Class<?> application) {
