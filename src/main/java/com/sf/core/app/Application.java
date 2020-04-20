@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Application {
-    private Map<Class,Object> Objs=new ConcurrentHashMap<>();
+    private Map<Class,Object> Objs=new ConcurrentHashMap<>(10);
     protected static void run(Class<?> aClass, String[] args) throws Exception {
         //TODO 命令模式,处理传过来的参数
         //TODO 加载class
