@@ -3,12 +3,10 @@ package com.sf.netty;
 import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Enumeration;
-import java.util.Map;
-import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
 public class NettyServer {
     private int port;
@@ -22,26 +20,24 @@ public class NettyServer {
     }
 
     private void start() throws IOException {
-//        ClassLoader parent = this.getClass();
-
-        Enumeration<URL> resources = NettyServer.class.getClassLoader().getParent().getResources("META-INF/");
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Enumeration<URL> resources = loader.getResources("META-INF/test");
         while (resources.hasMoreElements()) {
             URL url = resources.nextElement();
-            JarURLConnection jarConnection = (JarURLConnection) url.openConnection();
-            System.out.println(jarConnection.getEntryName());
-            JarFile jarFile = jarConnection.getJarFile();
-            Enumeration<JarEntry> entries = jarFile.entries();
-            while (entries.hasMoreElements()) {
-                JarEntry entry = entries.nextElement();
-                if (!entry.isDirectory()) {
+            URLConnection urlConnection = url.openConnection();
+            if (urlConnection instanceof JarURLConnection) {
+                JarURLConnection jarConnection = (JarURLConnection) urlConnection;
+                JarFile jarFile = jarConnection.getJarFile();
+                System.out.println(jarFile.getName());
+                Enumeration<JarEntry> entries = jarFile.entries();
+                while (entries.hasMoreElements()) {
+                    JarEntry entry = entries.nextElement();
+                    if (!entry.isDirectory()) {
 //                    System.out.println(entry.getName());
-                    System.out.println(entry);
+//                    System.out.println(entry);
+                    }
                 }
-
             }
-
-
         }
-
     }
 }
