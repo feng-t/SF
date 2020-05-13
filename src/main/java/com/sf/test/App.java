@@ -9,6 +9,6 @@ public class App{
     }
     @Fun
     public void t(){
-        System.out.println("main test");
+        System.out.println("main test.properties");
     }
 }
