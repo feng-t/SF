@@ -22,37 +22,41 @@ public class MyClassLoader extends ClassLoader {
         return defineClass(name, bytes, 0, bytes.length);
     }
 
-    public void parsing() throws Exception{
+    public void parsing() throws Exception {
         parsing(null);
     }
+
     protected void parsing(ClassHandler c) throws Exception {
         URL resource = application.getClassLoader().getResource("");
         assert resource != null;
-        prefix = new File(resource.toURI()).getCanonicalPath().replaceAll("\\\\","/")+"/";// resource.toURI().getPath();
+        prefix = new File(resource.toURI()).getCanonicalPath().replaceAll("\\\\", "/") + "/";// resource.toURI().getPath();
         URL url = application.getResource("");
-        recursivePrintFile(new File(url.toURI()),(file)->{
+        recursivePrintFile(new File(url.toURI()), (file) -> {
             String s = file.getCanonicalPath().replaceAll("\\\\", "/").split(prefix)[1];
             String classname = s.replaceAll("/", ".").substring(0, s.lastIndexOf("."));
             byte[] bytes = getClassBytes(file);
-            objs.put(classname,bytes);
+            objs.put(classname, bytes);
         });
         objs.keySet().forEach((key) -> {
             try {
                 Class<?> aClass = loadClass(key);
-                if (c!=null){
+                if (c != null) {
                     c.apply(aClass);
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
     }
+
     private byte[] getClassBytes(File file) throws IOException {
         FileInputStream inputStream = new FileInputStream(file);
         byte[] bytes = new byte[inputStream.available()];
         inputStream.read(bytes);
         return bytes;
     }
+
     private void recursivePrintFile(File file, FileHandler handler) throws IOException, ClassNotFoundException {
         if (file == null) {
             return;
@@ -71,9 +75,10 @@ public class MyClassLoader extends ClassLoader {
         }
     }
 
-    public interface ClassHandler{
+    public interface ClassHandler {
         void apply(Class<?> c) throws Exception;
     }
+
     public interface FileHandler {
         void apply(File f) throws IOException, ClassNotFoundException;
     }

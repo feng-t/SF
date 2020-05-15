@@ -1,10 +1,10 @@
 package com.sf.test.p1;
 
-import com.sf.core.annotation.fun.Fun;
-
 public class Test {
+    static {
+        System.out.println("被扫描到了");
+    }
 
-    @Fun
     public void test(){
         System.out.println("test.properties");
     }

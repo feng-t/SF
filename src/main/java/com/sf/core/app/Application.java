@@ -9,7 +9,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Application {
-    private Map<Class,Object> Objs=new ConcurrentHashMap<>(10);
+    private Map<Class, Object> Objs = new ConcurrentHashMap<>(10);
+
     public static void run(Class<?> aClass, String[] args) throws Exception {
         //TODO 命令模式,处理传过来的参数
         //TODO 加载class
@@ -23,18 +24,19 @@ public class Application {
 
     /**
      * TODO 处理 注解
+     *
      * @param aClass
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
     private void precessAnnotation(Class<?> aClass) throws Exception {
-        if (!aClass.isAnnotation()){
-            Object o =Objs.get(aClass);
-            if (o==null){
-                o=aClass.newInstance();
-                Objs.put(aClass,o);
+        if (!aClass.isAnnotation()&&!aClass.isInterface()) {
+            Object o = Objs.get(aClass);
+            if (o == null) {
+                o = aClass.newInstance();
+                Objs.put(aClass, o);
             }
-            if (aClass.isAnnotationPresent(Services.class)){
+            if (aClass.isAnnotationPresent(Services.class)) {
                 Services services = aClass.getAnnotation(Services.class);
                 Service[] value = services.value();
                 for (Service service : value) {
@@ -44,15 +46,12 @@ public class Application {
             }
             Method[] methods = aClass.getMethods();
             for (Method method : methods) {
-                if (method.isAnnotationPresent(Fun.class)){
+                if (method.isAnnotationPresent(Fun.class)) {
                     method.invoke(o);
                 }
             }
         }
     }
-
-
-
 
 
 }
