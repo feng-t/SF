@@ -1,11 +1,11 @@
 package com.sf.netty;
 
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
+import java.io.IOException;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class NettyServer {
     private int port;
@@ -15,68 +15,34 @@ public class NettyServer {
     }
 
     public static void main(String[] args) throws Exception {
-        new NettyServer(11090).start();
+        new NettyServer(11090).test();
     }
 
-    private void start() {
-        NioEventLoopGroup bossGroup = new NioEventLoopGroup();
-        NioEventLoopGroup workerGroup = new NioEventLoopGroup();
-        ServerBootstrap bootstrap = new ServerBootstrap();
-        bootstrap.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
-                .option(ChannelOption.SO_BACKLOG, 1024)
-                .childHandler(new ChannelInboundHandlerAdapter(){
-                    @Override
-                    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                        System.out.println("channelActive");
-                        super.channelActive(ctx);
-                    }
+    private void start() throws IOException {
 
-                    @Override
-                    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-                        System.out.println("channelInactive");
-                        super.channelInactive(ctx);
-                    }
+        Enumeration<URL> resources = NettyServer.class.getClassLoader().getResources("META-INF");
+        while (resources.hasMoreElements()) {
+            URL url = resources.nextElement();
+            JarURLConnection jarConnection = (JarURLConnection) url.openConnection();
+            JarFile jarFile = jarConnection.getJarFile();
+            Enumeration<JarEntry> entries = jarFile.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                if (!entry.isDirectory()) {
+//                    System.out.println(entry.getName());
+                    System.out.println(entry);
+                }
 
-                    @Override
-                    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                        System.out.println("channelRead");
-                        ctx.channel().write(msg);
-                        super.channelRead(ctx, msg);
-                    }
-
-                    @Override
-                    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-                        System.out.println("channelReadComplete");
-                        super.channelReadComplete(ctx);
-                    }
-
-                    @Override
-                    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-                        System.out.println("channelRegistered");
-                        super.channelRegistered(ctx);
-                    }
-
-                    @Override
-                    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-                        System.out.println("channelUnregistered");
-                        super.channelUnregistered(ctx);
-                    }
-
-                    @Override
-                    public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
-                        System.out.println("channelWritabilityChanged");
-                        super.channelWritabilityChanged(ctx);
-                    }
-
-                    @Override
-                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-//                        super.exceptionCaught(ctx, cause);
-                        ctx.channel().close();
-                    }
-                }).bind(port);
-
+            }
+        }
     }
 
-
+    public void test() throws Exception{
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Enumeration<URL> resources = loader.getResources("META-INF/spring.factories");
+        while (resources.hasMoreElements()) {
+            URL url = resources.nextElement();
+            System.out.println(url);
+        }
+    }
 }
