@@ -12,7 +12,8 @@ public class Solution {
     public static void main(String[] args) {
         new Solution().start();
     }
-    public void start(){
+
+    public void start() {
         TreeNode root = new TreeNode(1);
         TreeNode left = root.setLeft(5);
         left.setLeft(4);
@@ -26,17 +27,25 @@ public class Solution {
     }
 
 
-    private List<Integer> path(TreeNode root, int v,Set<List<Integer>> arr) {
-        if (root != null&&v>0) {
+    private List<Integer> path(TreeNode root, int v, Set<List<Integer>> arr) {
+        if (root != null && v > 0) {
             List<Integer> path = path(root.left, v - root.val, arr);
-            if (path!=null){
+            if (path != null) {
                 path.add(root.val);
+                return path;
             }
             List<Integer> integers = path(root.right, v - root.val, arr);
-            if (integers!=null){
+            if (integers != null) {
                 integers.add(root.val);
+                return integers;
             }
         }
-        return v==0?new ArrayList<Integer>():null;
+        if (v == 0) {
+            ArrayList<Integer> list = new ArrayList<>();
+            arr.add(list);
+            return list;
+        }else  {
+            return null;
+        }
     }
 }
