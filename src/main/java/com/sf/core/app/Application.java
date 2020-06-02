@@ -3,9 +3,12 @@ package com.sf.core.app;
 import com.sf.core.annotation.Service;
 import com.sf.core.annotation.Services;
 import com.sf.core.annotation.fun.Fun;
+import com.sf.core.utils.ClassUtils;
 
+import java.io.File;
 import java.lang.reflect.Method;
-import java.util.Map;
+import java.net.URL;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Application {
@@ -17,11 +20,35 @@ public class Application {
         new Application().run(aClass);
     }
 
+    //
+//    private void run(Class<?> aClass) throws Exception {
+//        MyClassLoader myClassLoader = new MyClassLoader(aClass);
+//        myClassLoader.parsing(this::precessAnnotation);
+//    }
     private void run(Class<?> aClass) throws Exception {
-        MyClassLoader myClassLoader = new MyClassLoader(aClass);
-        myClassLoader.parsing(this::precessAnnotation);
+        String packName = ClassUtils.packRevPath(aClass);
+        Enumeration<URL> resources = getClass().getClassLoader().getResources(packName);
+        Set<File> files = new HashSet<>();
+        while (resources.hasMoreElements()) {
+            URL url = resources.nextElement();
+            File file = new File(url.toURI());
+            addFiles(file,files);
+        }
     }
 
+    private void addFiles(File file,Set<File> set){
+        if (file!=null)
+        if (file.isDirectory()){
+            File[] files = file.listFiles();
+            if (files!=null){
+                for (File f : files) {
+                    addFiles(f,set);
+                }
+            }
+        }else {
+            set.add(file);
+        }
+    }
     /**
      * TODO 处理 注解
      *
@@ -30,7 +57,7 @@ public class Application {
      * @throws InstantiationException
      */
     private void precessAnnotation(Class<?> aClass) throws Exception {
-        if (!aClass.isAnnotation()&&!aClass.isInterface()) {
+        if (!aClass.isAnnotation() && !aClass.isInterface()) {
             Object o = Objs.get(aClass);
             if (o == null) {
                 o = aClass.newInstance();
