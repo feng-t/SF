@@ -42,7 +42,6 @@ public class MyClassLoader extends ClassLoader {
                 Class<?> aClass = loadClass(key);
                 if (c != null) {
                     c.apply(aClass);
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();

@@ -4,9 +4,8 @@ import java.io.File;
 
 public class ClassUtils {
     private static String getPackName(Class<?> aClass){
-        String simpleName = aClass.getSimpleName();
         String packName = aClass.getName();
-        packName = packName.substring(0,packName.lastIndexOf(simpleName)-1);
+        packName = packName.substring(0,packName.lastIndexOf("."));
         return packName;
     }
 

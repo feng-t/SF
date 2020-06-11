@@ -6,7 +6,6 @@ import com.sf.core.app.Application;
 public class App{
     public static void main(String[] args) throws Exception {
         Application.run(App.class,args);
-        String s = App.class.getName();
 //        System.out.println(s.substring(0,s.lastIndexOf(App.class.getSimpleName())-1));
 ////        Enumeration<URL> resources = App.class.getClassLoader().getResources("com/sf/");
 ////        while (resources.hasMoreElements()){
