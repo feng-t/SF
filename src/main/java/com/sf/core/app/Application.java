@@ -42,7 +42,11 @@ public class Application {
                     for (Field field : fields) {
                         field.setAccessible(true);
                         if (field.get(o)==null&&field.isAnnotationPresent(AutoWired.class)){
-                            field.set(o,beanFactory.bean.get(field.getType()));
+                            Object o1 = beanFactory.bean.get(field.getType());
+                            if (o1==null){
+                                throw new Exception("找不到bean "+field.getType());
+                            }
+                            field.set(o,o1);
                         }
                     }
                     for (Method method : methods) {
@@ -58,30 +62,22 @@ public class Application {
     }
 
     /**
-     * TODO 处理 注解 //先加载到所有的类，然后处理
-     *
      * @param aClass
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
     private void precessAnnotation(Class<?> aClass) throws Exception {
         if (!aClass.isAnnotation() && !aClass.isInterface()) {
-            if (ExceptionHandler.class.isAssignableFrom(aClass) && !DefaultClassLoader.class.isAssignableFrom(aClass)) {
+            if (ExceptionHandler.class.isAssignableFrom(aClass)) {
                 eh = (ExceptionHandler) aClass.newInstance();
             } else {
                 beanFactory.bean.put(aClass, aClass.newInstance());
             }
-//            if (aClass.isAnnotationPresent(Services.class)) {
-//                Services services = aClass.getAnnotation(Services.class);
-//                Service[] value = services.value();
-//                for (Service service : value) {
-//                    int hour = service.hour();
-//                    System.out.println(hour);
-//                }
-//            }
             beanFactory.classList.add(aClass);
         }
     }
 
+    public static void main(String[] args) {
 
+    }
 }
