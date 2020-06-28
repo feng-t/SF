@@ -1,22 +1,20 @@
 package com.sf.core.app;
 
-import com.sf.core.annotation.Service;
-import com.sf.core.annotation.Services;
+import com.sf.core.BeanFactory;
+import com.sf.core.annotation.AutoWired;
 import com.sf.core.annotation.fun.Fun;
-import com.sf.core.utils.ClassUtils;
+import com.sf.core.handler.DefaultExceptionHandler;
+import com.sf.core.handler.ExceptionHandler;
+import com.sf.core.load.DefaultClassLoader;
 
-import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Application {
-    private Map<Class, Object> Objs = new ConcurrentHashMap<>(10);
-    private Set<File> files;
+
+    public BeanFactory beanFactory = new BeanFactory();
+    public ExceptionHandler eh;
+
     public static void run(Class<?> aClass, String[] args) throws Exception {
         //TODO 命令模式,处理传过来的参数
         //TODO 加载class
@@ -24,36 +22,43 @@ public class Application {
     }
 
     private void run(Class<?> aClass) throws Exception {
-        MyClassLoader myClassLoader = new MyClassLoader(aClass);
-        myClassLoader.parsing(this::precessAnnotation);
-//        loadClass(aClass);
+        new DefaultClassLoader(aClass).preloadClass().parsing(this::precessAnnotation);
+        if (eh == null) {
+            eh = new DefaultExceptionHandler();
+        }
+        actionBean();
     }
 
-    private void loadClass(Class<?> aClass)throws Exception {
-        String packName = ClassUtils.packRevPath(aClass);
-        Enumeration<URL> resources = getClass().getClassLoader().getResources(packName);
-        files = new HashSet<>();
-        while (resources.hasMoreElements()) {
-            URL url = resources.nextElement();
-            File file = new File(url.toURI());
-            addFiles(file);
-        }
-    }
-    private void addFiles(File file){
-        if (file!=null)
-        if (file.isDirectory()){
-            File[] files = file.listFiles();
-            if (files!=null){
-                for (File f : files) {
-                    addFiles(f);
+    /**
+     * 处理bean
+     */
+    private void actionBean() {
+        for (Class<?> aClass : beanFactory.classList) {
+            Object o = beanFactory.bean.get(aClass);
+            if (o!=null){
+                Method[] methods = aClass.getDeclaredMethods();
+                Field[] fields = aClass.getDeclaredFields();
+                try {
+                    for (Field field : fields) {
+                        field.setAccessible(true);
+                        if (field.get(o)==null&&field.isAnnotationPresent(AutoWired.class)){
+                            field.set(o,beanFactory.bean.get(field.getType()));
+                        }
+                    }
+                    for (Method method : methods) {
+                        if (method.isAnnotationPresent(Fun.class)) {
+                            method.invoke(o);
+                        }
+                    }
+                } catch (Exception e) {
+                    eh.action(e, aClass);
                 }
             }
-        }else {
-            files.add(file);
         }
     }
+
     /**
-     * TODO 处理 注解
+     * TODO 处理 注解 //先加载到所有的类，然后处理
      *
      * @param aClass
      * @throws IllegalAccessException
@@ -61,25 +66,20 @@ public class Application {
      */
     private void precessAnnotation(Class<?> aClass) throws Exception {
         if (!aClass.isAnnotation() && !aClass.isInterface()) {
-            Object o = Objs.get(aClass);
-            if (o == null) {
-                o = aClass.newInstance();
-                Objs.put(aClass, o);
+            if (ExceptionHandler.class.isAssignableFrom(aClass) && !DefaultClassLoader.class.isAssignableFrom(aClass)) {
+                eh = (ExceptionHandler) aClass.newInstance();
+            } else {
+                beanFactory.bean.put(aClass, aClass.newInstance());
             }
-            if (aClass.isAnnotationPresent(Services.class)) {
-                Services services = aClass.getAnnotation(Services.class);
-                Service[] value = services.value();
-                for (Service service : value) {
-                    int hour = service.hour();
-                    System.out.println(hour);
-                }
-            }
-            Method[] methods = aClass.getMethods();
-            for (Method method : methods) {
-                if (method.isAnnotationPresent(Fun.class)) {
-                    method.invoke(o);
-                }
-            }
+//            if (aClass.isAnnotationPresent(Services.class)) {
+//                Services services = aClass.getAnnotation(Services.class);
+//                Service[] value = services.value();
+//                for (Service service : value) {
+//                    int hour = service.hour();
+//                    System.out.println(hour);
+//                }
+//            }
+            beanFactory.classList.add(aClass);
         }
     }
 

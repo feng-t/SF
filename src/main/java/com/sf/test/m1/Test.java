@@ -3,9 +3,8 @@ package com.sf.test.m1;
 import com.sf.core.annotation.fun.Fun;
 
 public class Test {
-    static {
-        System.out.println("load test");
-    }
+
+    public String str="123";
     @Fun
     public void test(){
         System.out.println("test");

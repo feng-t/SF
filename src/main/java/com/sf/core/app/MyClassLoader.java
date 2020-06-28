@@ -1,5 +1,7 @@
 package com.sf.core.app;
 
+import com.sf.core.load.ClassHandler;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -72,10 +74,6 @@ public class MyClassLoader extends ClassLoader {
                     recursivePrintFile(f, handler);
                 }
         }
-    }
-
-    public interface ClassHandler {
-        void apply(Class<?> c) throws Exception;
     }
 
     public interface FileHandler {
