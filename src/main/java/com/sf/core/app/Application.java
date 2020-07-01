@@ -2,13 +2,18 @@ package com.sf.core.app;
 
 import com.sf.core.BeanFactory;
 import com.sf.core.annotation.AutoWired;
+import com.sf.core.annotation.Service;
+import com.sf.core.annotation.Services;
 import com.sf.core.annotation.fun.Fun;
 import com.sf.core.handler.DefaultExceptionHandler;
 import com.sf.core.handler.ExceptionHandler;
 import com.sf.core.load.DefaultClassLoader;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Properties;
 
 public class Application {
 
@@ -16,8 +21,7 @@ public class Application {
     public ExceptionHandler eh;
 
     public static void run(Class<?> aClass, String[] args) throws Exception {
-        //TODO 命令模式,处理传过来的参数
-        //TODO 加载class
+        //TODO 处理传过来的参数
         new Application().run(aClass);
     }
 
@@ -33,31 +37,48 @@ public class Application {
      * 处理bean
      */
     private void actionBean() {
-        for (Class<?> aClass : beanFactory.classList) {
-            Object o = beanFactory.bean.get(aClass);
-            if (o!=null){
-                Method[] methods = aClass.getDeclaredMethods();
-                Field[] fields = aClass.getDeclaredFields();
-                try {
-                    for (Field field : fields) {
-                        field.setAccessible(true);
-                        if (field.get(o)==null&&field.isAnnotationPresent(AutoWired.class)){
-                            Object o1 = beanFactory.bean.get(field.getType());
-                            if (o1==null){
-                                throw new Exception("找不到bean "+field.getType());
-                            }
-                            field.set(o,o1);
-                        }
-                    }
-                    for (Method method : methods) {
-                        if (method.isAnnotationPresent(Fun.class)) {
-                            method.invoke(o);
-                        }
-                    }
-                } catch (Exception e) {
-                    eh.action(e, aClass);
+        Class<?> c=null;
+        try {
+            for (Class<?> aClass : beanFactory.classList) {
+                c = aClass;
+                Object o = beanFactory.bean.get(aClass);
+                if (o != null) {
+                    handlerAnnotation(aClass, o);
                 }
             }
+        } catch (Exception e) {
+            eh.action(e, c);
+        }
+    }
+
+    private void handlerAnnotation(Class<?> c, Object obj) throws Exception {
+        Method[] methods = c.getDeclaredMethods();
+        Field[] fields = c.getDeclaredFields();
+        if (c.isAnnotationPresent(Services.class)) {
+            Services services = c.getAnnotation(Services.class);
+            Service[] value = services.value();
+            for (Service service : value) {
+                int hour = service.hour();
+                System.out.println(hour);
+            }
+        }
+        //处理变量的注解
+        for (Field field : fields) {
+            field.setAccessible(true);
+            if (field.get(obj) == null && field.isAnnotationPresent(AutoWired.class)) {
+                Object o1 = beanFactory.bean.get(field.getType());
+                if (o1 == null) {
+                    throw new Exception("找不到bean " + field.getType());
+                }
+                field.set(obj, o1);
+            }
+        }
+        //处理方法的注解
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(Fun.class)) {
+                method.invoke(obj);
+            }
+
         }
     }
 
@@ -77,7 +98,12 @@ public class Application {
         }
     }
 
-    public static void main(String[] args) {
-
+    public static void main(String[] args) throws IOException {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();//.getContextClassLoader();
+        InputStream in = loader.getResourceAsStream("application.yml");
+        Properties properties = new Properties();
+        properties.load(in);
+        String test = properties.getProperty("test");
+        System.out.println(test);
     }
 }
