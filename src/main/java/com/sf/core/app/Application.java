@@ -1,28 +1,36 @@
 package com.sf.core.app;
 
 import com.sf.core.BeanFactory;
-import com.sf.core.annotation.AutoWired;
-import com.sf.core.annotation.Service;
-import com.sf.core.annotation.Services;
+import com.sf.core.annotation.*;
 import com.sf.core.annotation.fun.Fun;
 import com.sf.core.handler.DefaultExceptionHandler;
 import com.sf.core.handler.ExceptionHandler;
 import com.sf.core.load.DefaultClassLoader;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 public class Application {
-
+    public List<AbstractAnnotationHandler> annohandlers=new ArrayList<>();
     public BeanFactory beanFactory = new BeanFactory();
     public ExceptionHandler eh;
 
-    public static void run(Class<?> aClass, String[] args) throws Exception {
+    public static void run(Class<?> aClass, String[] args){
         //TODO 处理传过来的参数
-        new Application().run(aClass);
+        Application app = new Application();
+        try {
+            app.run(aClass);
+        }catch (Exception e){
+            if (app.eh == null) {
+                app.eh = new DefaultExceptionHandler();
+            }
+            app.eh.action(e,aClass);
+        }
     }
 
     private void run(Class<?> aClass) throws Exception {
@@ -30,7 +38,18 @@ public class Application {
         if (eh == null) {
             eh = new DefaultExceptionHandler();
         }
+        addAnnoHandler();
         actionBean();
+    }
+
+    private void addAnnoHandler() throws IllegalAccessException, InstantiationException {
+        Set<Class<?>> set = beanFactory.classList;
+        for (Class<?> aClass : set) {
+            if (AbstractAnnotationHandler.class.isAssignableFrom(aClass)&&!aClass.isInterface()){
+                annohandlers.add((AbstractAnnotationHandler) aClass.newInstance());
+                set.remove(aClass);
+            }
+        }
     }
 
     /**
@@ -43,7 +62,14 @@ public class Application {
                 c = aClass;
                 Object o = beanFactory.bean.get(aClass);
                 if (o != null) {
-                    handlerAnnotation(aClass, o);
+                    if (annohandlers.isEmpty()) {
+                        DefaultAnnotationHandler handler = new DefaultAnnotationHandler();
+                        handler.action(aClass, o);
+                    }else {
+                        for (AbstractAnnotationHandler handler : annohandlers) {
+                            handler.action(aClass, o);
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
@@ -51,6 +77,12 @@ public class Application {
         }
     }
 
+    /**
+     * 处理注解
+     * @param c
+     * @param obj
+     * @throws Exception
+     */
     private void handlerAnnotation(Class<?> c, Object obj) throws Exception {
         Method[] methods = c.getDeclaredMethods();
         Field[] fields = c.getDeclaredFields();
@@ -98,12 +130,13 @@ public class Application {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();//.getContextClassLoader();
-        InputStream in = loader.getResourceAsStream("application.yml");
+        InputStream in = loader.getResourceAsStream("application.properties");
         Properties properties = new Properties();
         properties.load(in);
-        String test = properties.getProperty("test");
-        System.out.println(test);
+        String test = properties.getProperty("test2");
+        Class<?> name = Class.forName(test);
+        System.out.println(name);
     }
 }

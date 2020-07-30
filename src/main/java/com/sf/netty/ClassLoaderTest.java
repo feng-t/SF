@@ -23,8 +23,6 @@ public class ClassLoaderTest {
                 while (entries.hasMoreElements()) {
                     JarEntry entry = entries.nextElement();
                     if (!entry.isDirectory()) {
-//                    System.out.println(entry.getName());
-//                    System.out.println(entry);
                     }
                 }
             }
