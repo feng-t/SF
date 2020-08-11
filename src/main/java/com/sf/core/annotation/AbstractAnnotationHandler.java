@@ -5,5 +5,7 @@ package com.sf.core.annotation;
  */
 public interface AbstractAnnotationHandler {
 
-    void action(Class<?> c, Object obj);
+    default void action(Class<?> c, Object obj){
+
+    }
 }

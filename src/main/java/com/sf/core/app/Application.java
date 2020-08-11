@@ -63,8 +63,9 @@ public class Application {
                 Object o = beanFactory.bean.get(aClass);
                 if (o != null) {
                     if (annohandlers.isEmpty()) {
-                        DefaultAnnotationHandler handler = new DefaultAnnotationHandler();
-                        handler.action(aClass, o);
+                        AbstractAnnotationHandler h = new AbstractAnnotationHandler() {
+                        };
+                        h.action(c,o);
                     }else {
                         for (AbstractAnnotationHandler handler : annohandlers) {
                             handler.action(aClass, o);
