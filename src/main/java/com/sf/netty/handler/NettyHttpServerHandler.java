@@ -15,7 +15,7 @@ public class NettyHttpServerHandler extends ChannelInboundHandlerAdapter {
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.OK,
-                Unpooled.wrappedBuffer("欢迎来到猿天地".getBytes(StandardCharsets.UTF_8)));
+                Unpooled.wrappedBuffer("撒打发斯蒂芬".getBytes(StandardCharsets.UTF_8)));
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain;charset=UTF-8");
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
