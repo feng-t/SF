@@ -1,23 +1,24 @@
 package com.sf.core.app;
 
 import com.sf.core.BeanFactory;
-import com.sf.core.annotation.*;
+import com.sf.core.annotation.AbstractAnnotationHandler;
+import com.sf.core.annotation.AutoWired;
+import com.sf.core.annotation.Service;
+import com.sf.core.annotation.Services;
 import com.sf.core.annotation.fun.Fun;
 import com.sf.core.handler.DefaultExceptionHandler;
 import com.sf.core.handler.ExceptionHandler;
 import com.sf.core.load.DefaultClassLoader;
 
-import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 public class Application {
     public List<AbstractAnnotationHandler> annohandlers=new ArrayList<>();
-    public BeanFactory beanFactory = new BeanFactory();
+    public static BeanFactory beanFactory = new BeanFactory();
     public ExceptionHandler eh;
 
     public static void run(Class<?> aClass, String[] args){
@@ -34,20 +35,22 @@ public class Application {
     }
 
     private void run(Class<?> aClass) throws Exception {
-        new DefaultClassLoader(aClass).preloadClass().parsing(this::precessAnnotation);
+        new DefaultClassLoader(aClass,"com.sf.core").preloadClass().parsing(this::precessAnnotation);
         if (eh == null) {
             eh = new DefaultExceptionHandler();
         }
-        addAnnoHandler();
+        addAnnHandler();
         actionBean();
     }
 
-    private void addAnnoHandler() throws IllegalAccessException, InstantiationException {
+    private void addAnnHandler() throws IllegalAccessException, InstantiationException {
         Set<Class<?>> set = beanFactory.classList;
-        for (Class<?> aClass : set) {
+        Iterator<Class<?>> it = set.iterator();
+        while (it.hasNext()){
+            Class<?> aClass = it.next();
             if (AbstractAnnotationHandler.class.isAssignableFrom(aClass)&&!aClass.isInterface()){
                 annohandlers.add((AbstractAnnotationHandler) aClass.newInstance());
-                set.remove(aClass);
+                it.remove();
             }
         }
     }
@@ -84,6 +87,7 @@ public class Application {
      * @param obj
      * @throws Exception
      */
+    @Deprecated
     private void handlerAnnotation(Class<?> c, Object obj) throws Exception {
         Method[] methods = c.getDeclaredMethods();
         Field[] fields = c.getDeclaredFields();
@@ -111,7 +115,6 @@ public class Application {
             if (method.isAnnotationPresent(Fun.class)) {
                 method.invoke(obj);
             }
-
         }
     }
 
@@ -121,23 +124,31 @@ public class Application {
      * @throws InstantiationException
      */
     private void precessAnnotation(Class<?> aClass) throws Exception {
-        if (!aClass.isAnnotation() && !aClass.isInterface()) {
+        if (!aClass.isAnnotation() && !aClass.isInterface()&& !Modifier.isAbstract(aClass.getModifiers())) {
             if (ExceptionHandler.class.isAssignableFrom(aClass)) {
                 eh = (ExceptionHandler) aClass.newInstance();
-            } else {
-                beanFactory.bean.put(aClass, aClass.newInstance());
             }
+            beanFactory.bean.put(aClass, aClass.newInstance());
             beanFactory.classList.add(aClass);
         }
     }
 
+
     public static void main(String[] args) throws Exception {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();//.getContextClassLoader();
-        InputStream in = loader.getResourceAsStream("application.properties");
-        Properties properties = new Properties();
-        properties.load(in);
-        String test = properties.getProperty("test2");
-        Class<?> name = Class.forName(test);
-        System.out.println(name);
+        Class<DefaultClassLoader> loaderClass = DefaultClassLoader.class;
+        Constructor<?>[] constructors = loaderClass.getConstructors();
+        for (Constructor<?> constructor : constructors) {
+
+            System.out.println(constructor.getName());
+        }
+
+        System.out.println();
+//        ClassLoader loader = Thread.currentThread().getContextClassLoader();//.getContextClassLoader();
+//        InputStream in = loader.getResourceAsStream("application.properties");
+//        Properties properties = new Properties();
+//        properties.load(in);
+//        String test = properties.getProperty("test2");
+//        Class<?> name = Class.forName(test);
+//        System.out.println(name);
     }
 }

@@ -2,9 +2,19 @@ package com.sf.core.load;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ConfigLoader {
+    /**
+     * 保存所有配置
+     */
+    private final Map<String,String> configKey = new ConcurrentHashMap<>();
+    public String getConfig(String key){
+        return configKey.get(key);
+    }
     private ConfigLoader(){}
 
     public void load() throws IOException {
@@ -20,7 +30,11 @@ public class ConfigLoader {
         InputStream stream = ConfigLoader.class.getResourceAsStream(path);
         Properties p =new Properties();
         p.load(stream);
-        System.out.println(p);
+        Enumeration<?> names = p.propertyNames();
+        while (names.hasMoreElements()){
+            String key = (String) names.nextElement();
+            configKey.put(key,p.getProperty(key));
+        }
     }
 
     public static void main(String[] args) throws IOException {
