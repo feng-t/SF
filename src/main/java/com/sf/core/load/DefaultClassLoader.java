@@ -16,9 +16,6 @@ public class DefaultClassLoader {
     private Class<?> application;
     private List<String> prePaths=new CopyOnWriteArrayList<>();
 
-    public DefaultClassLoader(){
-
-    }
     public DefaultClassLoader(Class<?> application) throws IOException {
        this(application, new String[]{});
     }
