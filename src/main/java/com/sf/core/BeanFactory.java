@@ -16,12 +16,14 @@ public class BeanFactory {
     public List<AbstractAnnotationHandler> annotationHandler = new ArrayList<>();
 
     public final Set<Class<?>> classList=new HashSet<>();
-    //存放bean
+    /**
+     * 存放bean
+     */
     public final Map<Class<?>,Object> beanMap = new ConcurrentHashMap<>();
     public ExceptionHandler exceptionHandler;
     /**
      * 实例化对象，并且添加到beanMap中
-     * @param aClass
+     * @param aClass class
      */
     public void precessAnnotation(Class<?> aClass) {
         if (!aClass.isAnnotation() && !aClass.isInterface() && !Modifier.isAbstract(aClass.getModifiers())) {
@@ -31,16 +33,14 @@ public class BeanFactory {
                 }
                 beanMap.put(aClass, aClass.newInstance());
                 classList.add(aClass);
-            } catch (Exception ignore) {
-
+            } catch (Exception e) {
+                System.err.print("error Class: "+aClass.getName()+" message: "+e.getMessage());
             }
         }
     }
 
     /**
      * 注解处理
-     * @throws IllegalAccessException
-     * @throws InstantiationException
      */
     public void addAnnotationHandler() throws IllegalAccessException, InstantiationException {
         Iterator<Class<?>> it = classList.iterator();

@@ -37,15 +37,6 @@ public class Application {
         beanFactory.invokeAnnotationHandler();
     }
 
-
-
-
-
-    public static void main(String[] args) throws Exception {
-
-    }
-
-
     /**
      * 处理注解,废弃
      * @param c
