@@ -2,7 +2,7 @@ package com.sf.core;
 
 import com.sf.core.annotation.AbstractAnnotationHandler;
 import com.sf.core.handler.DefaultExceptionHandler;
-import com.sf.core.handler.ExceptionHandler;
+import com.sf.core.handler.AbstractExceptionHandler;
 
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -15,12 +15,18 @@ public class BeanFactory {
      */
     public List<AbstractAnnotationHandler> annotationHandler = new ArrayList<>();
 
+    /**
+     * 预加载类
+     */
     public final Set<Class<?>> classList=new HashSet<>();
     /**
      * 存放bean
      */
     public final Map<Class<?>,Object> beanMap = new ConcurrentHashMap<>();
-    public ExceptionHandler exceptionHandler;
+    /**
+     * 全局错误处理
+     */
+    public AbstractExceptionHandler exceptionHandler;
     /**
      * 实例化对象，并且添加到beanMap中
      * @param aClass class
@@ -28,8 +34,8 @@ public class BeanFactory {
     public void precessAnnotation(Class<?> aClass) {
         if (!aClass.isAnnotation() && !aClass.isInterface() && !Modifier.isAbstract(aClass.getModifiers())) {
             try {
-                if (ExceptionHandler.class.isAssignableFrom(aClass)) {
-                    exceptionHandler = (ExceptionHandler) aClass.newInstance();
+                if (AbstractExceptionHandler.class.isAssignableFrom(aClass)) {
+                    exceptionHandler = (AbstractExceptionHandler) aClass.newInstance();
                 }
                 beanMap.put(aClass, aClass.newInstance());
                 classList.add(aClass);
@@ -62,13 +68,9 @@ public class BeanFactory {
                 if (o == null) {
                     continue;
                 }
-                if (annotationHandler.isEmpty()) {
-                    AbstractAnnotationHandler h = new AbstractAnnotationHandler() {
-                    };
-                    h.action(c, o);
-                } else {
+                if (!annotationHandler.isEmpty()) {
                     for (AbstractAnnotationHandler handler : annotationHandler) {
-                        handler.action(aClass, o);
+                        handler.invoke(aClass, o);
                     }
                 }
             }

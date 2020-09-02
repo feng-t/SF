@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 
 public class AutoWiredHandler implements AbstractAnnotationHandler {
     @Override
-    public void action(Class<?> c, Object obj) throws Exception {
+    public void invoke(Class<?> c, Object obj) throws Exception {
         Field[] fields = c.getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);

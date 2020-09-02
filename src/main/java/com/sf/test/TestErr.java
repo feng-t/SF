@@ -1,9 +1,9 @@
 package com.sf.test;
 
 import com.sf.core.annotation.AutoWired;
-import com.sf.core.handler.ExceptionHandler;
+import com.sf.core.handler.AbstractExceptionHandler;
 
-public class TestErr extends ExceptionHandler {
+public class TestErr extends AbstractExceptionHandler {
 
     @AutoWired
     public App app;
