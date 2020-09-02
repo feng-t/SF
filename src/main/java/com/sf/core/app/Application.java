@@ -13,16 +13,24 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 public class Application {
-    public static BeanFactory beanFactory = new BeanFactory();
 
-    public static void run(Class<?> aClass, String[] args) {
+    private Application(){}
+
+    public static Application getApp() {
+        return instance.singleton.app;
+    }
+
+    public BeanFactory beanFactory = new BeanFactory();
+
+    public BeanFactory getBeanFactory() {
+        return beanFactory;
+    }
+
+    public static void run(Class<?> aClass, String[] args) throws Exception {
         //TODO 处理传过来的参数
-        Application app = new Application();
-        try {
-            app.run(aClass);
-        } catch (Exception e) {
+        Application app = getApp();
+        app.run(aClass);
 
-        }
     }
 
     private void run(Class<?> aClass) throws Exception {
@@ -30,6 +38,32 @@ public class Application {
         beanFactory.addAnnHandler();
         beanFactory.actionBean();
     }
+
+
+
+
+
+    public static void main(String[] args) throws Exception {
+        Class<DefaultClassLoader> loaderClass = DefaultClassLoader.class;
+
+
+        Constructor<?>[] constructors = loaderClass.getConstructors();
+        for (Constructor<?> constructor : constructors) {
+            Type[] types = constructor.getGenericParameterTypes();
+        }
+        Constructor<DefaultClassLoader> constructor = loaderClass.getConstructor();
+        System.out.println();
+
+
+//        ClassLoader loader = Thread.currentThread().getContextClassLoader();//.getContextClassLoader();
+//        InputStream in = loader.getResourceAsStream("application.properties");
+//        Properties properties = new Properties();
+//        properties.load(in);
+//        String test = properties.getProperty("test2");
+//        Class<?> name = Class.forName(test);
+//        System.out.println(name);
+    }
+
 
     /**
      * 处理注解
@@ -70,26 +104,15 @@ public class Application {
     }
 
 
+    private enum instance{
+        singleton;
+        public Application app;
 
-
-    public static void main(String[] args) throws Exception {
-        Class<DefaultClassLoader> loaderClass = DefaultClassLoader.class;
-
-
-        Constructor<?>[] constructors = loaderClass.getConstructors();
-        for (Constructor<?> constructor : constructors) {
-            Type[] types = constructor.getGenericParameterTypes();
+        public Application getApp() {
+            if (app==null){
+                app=new Application();
+            }
+            return app;
         }
-        Constructor<DefaultClassLoader> constructor = loaderClass.getConstructor();
-        System.out.println();
-
-
-//        ClassLoader loader = Thread.currentThread().getContextClassLoader();//.getContextClassLoader();
-//        InputStream in = loader.getResourceAsStream("application.properties");
-//        Properties properties = new Properties();
-//        properties.load(in);
-//        String test = properties.getProperty("test2");
-//        Class<?> name = Class.forName(test);
-//        System.out.println(name);
     }
 }

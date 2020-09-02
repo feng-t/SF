@@ -1,20 +1,22 @@
 package com.sf.netty.proto;
 
-import com.sf.netty.handler.NettyHttpServerHandler;
+import com.sf.netty.proto.parser.HttpProcessHandler;
+import com.sf.netty.proto.parser.WsProcessHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ProtocolRoutHandler extends ChannelInboundHandlerAdapter {
-    public List<ProcessProtoResolve> protoResolves=new ArrayList<>();
+    public Set<ProcessProtoResolve> protoResolves=new HashSet<>();
+    //TODO 临时
+    public ProtocolRoutHandler(){
+        protoResolves.add(new HttpProcessHandler());
+        protoResolves.add(new WsProcessHandler());
+    }
 
-    private static final String WEBSOCKET_PATH = "/websocket";
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         System.out.println("Active");
@@ -28,11 +30,8 @@ public class ProtocolRoutHandler extends ChannelInboundHandlerAdapter {
         if (!in.isReadable()){
             return;
         }
-        byte[] bytes = new byte[in.readableBytes()];
-        in.copy(0, in.readableBytes()).readBytes(bytes);
-
         for (ProcessProtoResolve resolve : protoResolves) {
-            if (resolve.isProcess(ctx,bytes)){
+            if (resolve.isProcess(ctx,in.copy(0, in.readableBytes()))){
                 break;
             }
         }
@@ -40,19 +39,9 @@ public class ProtocolRoutHandler extends ChannelInboundHandlerAdapter {
 //        System.out.println("----------------开始输出--------------");
 //        System.out.println(s);
 //        System.out.println("----------------结束输出--------------");
-        ChannelPipeline pipeline = ctx.pipeline();
-        pipeline.addLast(new HttpResponseEncoder(),
-                new HttpRequestDecoder(),
-                new NettyHttpServerHandler()
-        );
 
 
-//        pipeline.addLast(new HttpServerCodec());
-//        pipeline.addLast(new HttpObjectAggregator(65536));
-//        pipeline.addLast(new WebSocketServerCompressionHandler());
-//        pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
-////        pipeline.addLast(new WebSocketIndexPageHandler(WEBSOCKET_PATH));
-//        pipeline.addLast(new WebSocketFrameHandler());
+
         ctx.fireChannelRead(msg);
     }
 

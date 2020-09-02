@@ -7,7 +7,7 @@ import com.sf.core.app.Application;
  * 处理注解
  */
 public interface AbstractAnnotationHandler {
-    BeanFactory beanFactory = Application.beanFactory;
+    BeanFactory beanFactory = Application.getApp().beanFactory;
 
     default void action(Class<?> c, Object obj) throws Exception {
 

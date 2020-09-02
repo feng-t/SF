@@ -6,6 +6,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LoggingHandler;
 
 import java.io.IOException;
 import java.net.URL;
@@ -35,6 +36,7 @@ public class NettyServer {
                     //设置线程连接个数
                     .option(ChannelOption.SO_BACKLOG,1024)
 //                    .handler(login)
+                    .handler(new LoggingHandler())
                     .childHandler(new ServerInitializer())
                     .bind(port).sync();
             f.channel().closeFuture().sync();

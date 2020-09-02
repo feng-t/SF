@@ -9,11 +9,15 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BeanFactory {
+
     public List<AbstractAnnotationHandler> annohandlers = new ArrayList<>();
+
     public final Set<Class<?>> classList=new HashSet<>();
+    //存放bean
     public final Map<Class<?>,Object> bean = new ConcurrentHashMap<>();
     public ExceptionHandler eh;
     /**
+     *
      * @param aClass
      */
     public void precessAnnotation(Class<?> aClass) {
@@ -25,6 +29,7 @@ public class BeanFactory {
                 bean.put(aClass, aClass.newInstance());
                 classList.add(aClass);
             } catch (Exception ignore) {
+
             }
         }
     }
