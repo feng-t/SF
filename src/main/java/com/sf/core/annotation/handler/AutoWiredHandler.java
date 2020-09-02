@@ -12,7 +12,7 @@ public class AutoWiredHandler implements AbstractAnnotationHandler {
         for (Field field : fields) {
             field.setAccessible(true);
             if (field.get(obj)==null&&field.isAnnotationPresent(AutoWired.class)){
-                Object o1 = beanFactory.bean.get(field.getType());
+                Object o1 = beanFactory.beanMap.get(field.getType());
                 if (o1 == null) {
                     throw new Exception("找不到bean " + field.getType());
                 }

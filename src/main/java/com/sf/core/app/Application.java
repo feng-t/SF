@@ -33,8 +33,8 @@ public class Application {
 
     private void run(Class<?> aClass) throws Exception {
         new DefaultClassLoader(aClass, "com.sf.core").preloadClass().parsing(beanFactory::precessAnnotation);
-        beanFactory.addAnnHandler();
-        beanFactory.actionBean();
+        beanFactory.addAnnotationHandler();
+        beanFactory.invokeAnnotationHandler();
     }
 
 
@@ -68,7 +68,7 @@ public class Application {
         for (Field field : fields) {
             field.setAccessible(true);
             if (field.get(obj) == null && field.isAnnotationPresent(AutoWired.class)) {
-                Object o1 = beanFactory.bean.get(field.getType());
+                Object o1 = beanFactory.beanMap.get(field.getType());
                 if (o1 == null) {
                     throw new Exception("找不到bean " + field.getType());
                 }
