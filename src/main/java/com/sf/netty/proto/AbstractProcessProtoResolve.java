@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * 协议解析
  */
-public abstract class ProcessProtoResolve {
+public abstract class AbstractProcessProtoResolve {
     private List<ChannelHandler> channelHandlers=new ArrayList<>();
     private boolean full=false;
     /**

@@ -1,7 +1,7 @@
 package com.sf.netty.proto.parser;
 
 import com.sf.netty.handler.WebSocketFrameHandler;
-import com.sf.netty.proto.ProcessProtoResolve;
+import com.sf.netty.proto.AbstractProcessProtoResolve;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -13,7 +13,7 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketSe
 import java.util.Arrays;
 import java.util.List;
 
-public class WsProcessHandler extends ProcessProtoResolve {
+public class WsProcessHandler extends AbstractProcessProtoResolve {
     private static final String WEBSOCKET_PATH = "/websocket";
     @Override
     public boolean isDecode(ByteBuf buf) {

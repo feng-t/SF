@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ProtocolRoutHandler extends ChannelInboundHandlerAdapter {
-    public Set<ProcessProtoResolve> protoResolves=new HashSet<>();
+    public Set<AbstractProcessProtoResolve> protoResolves=new HashSet<>();
     //TODO 临时
     public ProtocolRoutHandler(){
         protoResolves.add(new HttpProcessHandler());
@@ -30,7 +30,7 @@ public class ProtocolRoutHandler extends ChannelInboundHandlerAdapter {
         if (!in.isReadable()){
             return;
         }
-        for (ProcessProtoResolve resolve : protoResolves) {
+        for (AbstractProcessProtoResolve resolve : protoResolves) {
             if (resolve.isProcess(ctx,in.copy(0, in.readableBytes()))){
                 break;
             }
