@@ -7,10 +7,8 @@ import com.sf.core.annotation.Services;
 import com.sf.core.annotation.fun.Fun;
 import com.sf.core.load.DefaultClassLoader;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 
 public class Application {
 
@@ -44,30 +42,12 @@ public class Application {
 
 
     public static void main(String[] args) throws Exception {
-        Class<DefaultClassLoader> loaderClass = DefaultClassLoader.class;
 
-
-        Constructor<?>[] constructors = loaderClass.getConstructors();
-        for (Constructor<?> constructor : constructors) {
-            Type[] types = constructor.getGenericParameterTypes();
-        }
-        Constructor<DefaultClassLoader> constructor = loaderClass.getConstructor();
-        System.out.println();
-
-
-//        ClassLoader loader = Thread.currentThread().getContextClassLoader();//.getContextClassLoader();
-//        InputStream in = loader.getResourceAsStream("application.properties");
-//        Properties properties = new Properties();
-//        properties.load(in);
-//        String test = properties.getProperty("test2");
-//        Class<?> name = Class.forName(test);
-//        System.out.println(name);
     }
 
 
     /**
-     * 处理注解
-     *
+     * 处理注解,废弃
      * @param c
      * @param obj
      * @throws Exception
