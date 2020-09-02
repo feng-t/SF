@@ -1,22 +1,19 @@
 package com.sf.core.app;
 
 import com.sf.core.BeanFactory;
-import com.sf.core.annotation.AbstractAnnotationHandler;
 import com.sf.core.annotation.AutoWired;
 import com.sf.core.annotation.Service;
 import com.sf.core.annotation.Services;
 import com.sf.core.annotation.fun.Fun;
-import com.sf.core.handler.DefaultExceptionHandler;
-import com.sf.core.handler.ExceptionHandler;
 import com.sf.core.load.DefaultClassLoader;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 public class Application {
-    public List<AbstractAnnotationHandler> annohandlers = new ArrayList<>();
     public static BeanFactory beanFactory = new BeanFactory();
-    public ExceptionHandler eh;
 
     public static void run(Class<?> aClass, String[] args) {
         //TODO 处理传过来的参数
@@ -24,58 +21,14 @@ public class Application {
         try {
             app.run(aClass);
         } catch (Exception e) {
-            if (app.eh == null) {
-                app.eh = new DefaultExceptionHandler();
-            }
-            app.eh.action(e, aClass);
+
         }
     }
 
     private void run(Class<?> aClass) throws Exception {
-        new DefaultClassLoader(aClass, "com.sf.core").preloadClass().parsing(this::precessAnnotation);
-        if (eh == null) {
-            eh = new DefaultExceptionHandler();
-        }
-        addAnnHandler();
-        actionBean();
-    }
-
-    private void addAnnHandler() throws IllegalAccessException, InstantiationException {
-        Set<Class<?>> set = beanFactory.classList;
-        Iterator<Class<?>> it = set.iterator();
-        while (it.hasNext()) {
-            Class<?> aClass = it.next();
-            if (AbstractAnnotationHandler.class.isAssignableFrom(aClass) && !aClass.isInterface()) {
-                annohandlers.add((AbstractAnnotationHandler) aClass.newInstance());
-                it.remove();
-            }
-        }
-    }
-
-    /**
-     * 处理bean
-     */
-    private void actionBean() {
-        Class<?> c = null;
-        try {
-            for (Class<?> aClass : beanFactory.classList) {
-                c = aClass;
-                Object o = beanFactory.bean.get(aClass);
-                if (o != null) {
-                    if (annohandlers.isEmpty()) {
-                        AbstractAnnotationHandler h = new AbstractAnnotationHandler() {
-                        };
-                        h.action(c, o);
-                    } else {
-                        for (AbstractAnnotationHandler handler : annohandlers) {
-                            handler.action(aClass, o);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            eh.action(e, c);
-        }
+        new DefaultClassLoader(aClass, "com.sf.core").preloadClass().parsing(beanFactory::precessAnnotation);
+        beanFactory.addAnnHandler();
+        beanFactory.actionBean();
     }
 
     /**
@@ -116,21 +69,7 @@ public class Application {
         }
     }
 
-    /**
-     * @param aClass
-     */
-    private void precessAnnotation(Class<?> aClass) {
-        if (!aClass.isAnnotation() && !aClass.isInterface() && !Modifier.isAbstract(aClass.getModifiers())) {
-            try {
-                if (ExceptionHandler.class.isAssignableFrom(aClass)) {
-                    eh = (ExceptionHandler) aClass.newInstance();
-                }
-                beanFactory.bean.put(aClass, aClass.newInstance());
-                beanFactory.classList.add(aClass);
-            } catch (Exception ignore) {
-            }
-        }
-    }
+
 
 
     public static void main(String[] args) throws Exception {

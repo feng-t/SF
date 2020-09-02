@@ -1,8 +1,9 @@
 package com.sf.netty;
 
-import com.sf.netty.handler.ProtocolRoutHandler;
+import com.sf.netty.initial.ServerInitializer;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
@@ -34,13 +35,7 @@ public class NettyServer {
                     //设置线程连接个数
                     .option(ChannelOption.SO_BACKLOG,1024)
 //                    .handler(login)
-                    .childHandler(new ChannelInitializer<Channel>() {
-                        @Override
-                        protected void initChannel(Channel ch) throws Exception {
-                            ChannelPipeline pip = ch.pipeline();
-                            pip.addLast(new ProtocolRoutHandler());
-                        }
-                    })
+                    .childHandler(new ServerInitializer())
                     .bind(port).sync();
             f.channel().closeFuture().sync();
         } catch (InterruptedException e) {
