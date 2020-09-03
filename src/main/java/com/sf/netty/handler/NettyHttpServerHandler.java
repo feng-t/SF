@@ -50,6 +50,7 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<Object> 
         cause.printStackTrace();
     }
 }
+
 //public class NettyHttpServerHandler extends ChannelInboundHandlerAdapter {
 //
 //    @Override
