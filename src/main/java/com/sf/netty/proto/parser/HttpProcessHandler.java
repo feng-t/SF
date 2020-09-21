@@ -13,9 +13,9 @@ import java.util.List;
 public class HttpProcessHandler extends AbstractProcessProtoResolve {
     @Override
     public boolean isDecode(ByteBuf buf) {
-        byte[] bytes = new byte[buf.readableBytes()];
-        buf.readBytes(bytes);
-        System.out.println(new String(bytes));
+//        byte[] bytes = new byte[buf.readableBytes()];
+//        buf.readBytes(bytes);
+//        System.out.println(new String(bytes));
         return true;
     }
 

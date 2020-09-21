@@ -4,6 +4,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 public class ServerHandler extends ChannelInboundHandlerAdapter {
+    @Override
+    protected void ensureNotSharable() {
+        super.ensureNotSharable();
+    }
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -51,6 +55,12 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         System.out.println("逻辑处理器被移除：handlerRemoved()");
         super.handlerRemoved(ctx);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        System.err.println("channel 异常");
+        ctx.close();
     }
 }
 

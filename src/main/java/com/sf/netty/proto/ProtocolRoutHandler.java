@@ -3,10 +3,13 @@ package com.sf.netty.proto;
 import com.sf.netty.proto.parser.HttpProcessHandler;
 import com.sf.netty.proto.parser.WsProcessHandler;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelPipeline;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class ProtocolRoutHandler extends ChannelInboundHandlerAdapter {
@@ -20,6 +23,25 @@ public class ProtocolRoutHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         System.out.println("Active");
+        ChannelPipeline entries = ctx.pipeline();
+        entries.addLast(new ChannelHandler() {
+            @Override
+            public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+
+            }
+
+            @Override
+            public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+
+            }
+
+            @Override
+            public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+
+            }
+        });
+        Map<String, ChannelHandler> map = entries.toMap();
+        System.out.println(map.size());
         super.channelActive(ctx);
     }
 
@@ -30,6 +52,8 @@ public class ProtocolRoutHandler extends ChannelInboundHandlerAdapter {
         if (!in.isReadable()){
             return;
         }
+
+
         for (AbstractProcessProtoResolve resolve : protoResolves) {
             if (resolve.isProcess(ctx,in.copy(0, in.readableBytes()))){
                 break;

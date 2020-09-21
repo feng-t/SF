@@ -13,4 +13,5 @@ public class ClassUtils {
     public static String packRevPath(Class<?> aClass){
         return getPackName(aClass).replace(".", File.separator);
     }
+
 }

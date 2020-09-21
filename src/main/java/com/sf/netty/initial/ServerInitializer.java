@@ -1,6 +1,6 @@
 package com.sf.netty.initial;
 
-import com.sf.netty.proto.ProtocolRoutHandler;
+import com.sf.netty.handler.ServerHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -14,6 +14,8 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         //设置读写空闲监听器，避免死链接
         pip.addLast(new ReadTimeoutHandler(180),
                 new WriteTimeoutHandler(180),
-                new ProtocolRoutHandler());
+                new ServerHandler()
+//                , new ProtocolRoutHandler()
+        );
     }
 }

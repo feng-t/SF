@@ -1,7 +1,6 @@
 package com.sf.netty.handler;
 
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -16,22 +15,22 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<Object> 
 
         if (msg instanceof HttpContent) {
             HttpContent content = (HttpContent) msg;
-            ByteBuf in = content.content();
-            if (!in.isReadable()) {
-                return;
-            }
-            byte[] bytes = new byte[in.readableBytes()];
-            in.readBytes(bytes);
-            String s = new String(bytes);
-            System.out.println("----------------获取到--------------");
-            System.out.println(s);
-            System.out.println("----------------netty--------------");
+//            ByteBuf in = content.content();
+//            if (!in.isReadable()) {
+//                return;
+//            }
+//            byte[] bytes = new byte[in.readableBytes()];
+//            in.readBytes(bytes);
+//            String s = new String(bytes);
+//            System.out.println("----------------获取到--------------");
+//            System.out.println(s);
+//            System.out.println("----------------netty--------------");
         }
         if (msg instanceof HttpRequest){
-            HttpRequest req = (HttpRequest) msg;
-            System.out.println("------------------------req=----------------------");
-            System.out.println(req);
-            System.out.println("------------------------req----------------------");
+//            HttpRequest req = (HttpRequest) msg;
+//            System.out.println("------------------------req=----------------------");
+//            System.out.println(req);
+//            System.out.println("------------------------req----------------------");
         }
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
