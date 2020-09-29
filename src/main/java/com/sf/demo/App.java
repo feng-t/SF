@@ -1,4 +1,4 @@
-package com.sf.test;
+package com.sf.demo;
 
 import com.sf.core.annotation.AutoWired;
 import com.sf.core.annotation.fun.Fun;

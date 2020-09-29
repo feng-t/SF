@@ -40,7 +40,7 @@ public class BeanFactory {
                 beanMap.put(aClass, aClass.newInstance());
                 classList.add(aClass);
             } catch (Exception e) {
-                System.err.print("error Class: "+aClass.getName()+" message: "+e.getMessage());
+                e.printStackTrace();
             }
         }
     }

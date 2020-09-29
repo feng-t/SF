@@ -15,7 +15,7 @@ public class Application {
     private Application(){}
 
     public static Application getApp() {
-        return instance.singleton.app;
+        return instance.singleton.getApp();
     }
 
     public BeanFactory beanFactory = new BeanFactory();
@@ -77,7 +77,7 @@ public class Application {
 
     private enum instance{
         singleton;
-        public Application app;
+        private Application app;
 
         public Application getApp() {
             if (app==null){
