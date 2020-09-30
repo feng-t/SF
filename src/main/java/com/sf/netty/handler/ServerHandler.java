@@ -58,9 +58,15 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        System.out.println("userEventTriggered ");
+    }
+
+    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        System.err.println("channel 异常");
+        System.out.println("线程异常关闭 ");
         ctx.close();
     }
+
 }
 
