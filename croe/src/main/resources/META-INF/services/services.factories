@@ -1,0 +1,3 @@
+com.sf.bean.TestBeanFactory=\
+com.sf.bean.imp.TestBeanFactoryAImpl,\
+com.sf.bean.imp.TestBeanFactoryBImpl
