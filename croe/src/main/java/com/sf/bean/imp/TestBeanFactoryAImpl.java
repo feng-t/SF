@@ -6,5 +6,6 @@ public class TestBeanFactoryAImpl implements TestBeanFactory {
     @Override
     public void test() {
         System.out.println("A");
+
     }
 }
