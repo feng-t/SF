@@ -8,4 +8,9 @@ public class SPIImpl implements SPITest {
     public void test() {
         System.out.println("TEST 2");
     }
+
+    @Override
+    public String toString() {
+        return "test spi";
+    }
 }

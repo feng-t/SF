@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.Set;
 
 public class ServiceLoaderTest {
 
@@ -17,8 +18,6 @@ public class ServiceLoaderTest {
     public static final String FACTORIES_RESOURCE_LOCATION = "META-INF/spring.factories";
 
     public static void main(String[] args) throws IOException {
-//        ServiceLoader<TestBeanFactory> serviceLoader = ServiceLoader.load(TestBeanFactory.class);
-//        serviceLoader.forEach(TestBeanFactory::test);
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         InputStream inputStream = null;
         try {
@@ -30,10 +29,17 @@ public class ServiceLoaderTest {
                 inputStream = url.openStream();
                 Properties prop = new Properties();
                 prop.load(inputStream);
-                String property = prop.getProperty("com.sf.test1.SPITest");
-                Class<?> aClass =  Class.forName(property);
-                SPITest test = (SPITest) aClass.newInstance();
-                test.test();
+                Set<String> interfaces = prop.stringPropertyNames();
+                for (String faces : interfaces) {
+                    String impl = prop.getProperty(faces);
+                    String[] className = impl.split(",");
+                    for (String name : className) {
+                        Class<?> aClass = Class.forName(name);
+                        Object o = aClass.newInstance();
+                        System.out.println(o.toString());
+                    }
+                }
+
             }
         } catch (IOException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
