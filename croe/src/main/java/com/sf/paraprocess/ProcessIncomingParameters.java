@@ -12,7 +12,7 @@ public class ProcessIncomingParameters {
      */
     private static final Map<String, String> parameters = new HashMap<>();
 
-    public void process(String[] ages)throws Exception{
+    public void process(String[] ages){
         for (String age : ages) {
             String[] kv = age.split(":");
             parameters.put(kv[0],kv[1]);

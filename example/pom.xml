@@ -11,5 +11,12 @@
 
     <artifactId>sf-example</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.sf</groupId>
+            <artifactId>sf-croe</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 </project>
