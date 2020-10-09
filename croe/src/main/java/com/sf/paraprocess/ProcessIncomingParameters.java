@@ -1,4 +1,4 @@
-package com.sf.app.paraprocess;
+package com.sf.paraprocess;
 
 import java.util.HashMap;
 import java.util.Map;

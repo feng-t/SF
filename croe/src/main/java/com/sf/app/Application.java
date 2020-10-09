@@ -1,7 +1,6 @@
 package com.sf.app;
 
-import com.sf.app.paraprocess.ProcessIncomingParameters;
-
+import com.sf.paraprocess.ProcessIncomingParameters;
 public class Application {
     private static final Application app = new Application();
     private static final ProcessIncomingParameters incomingParameters=new ProcessIncomingParameters();
@@ -17,7 +16,11 @@ public class Application {
         app.run(clazz);
     }
     public void run(Class<?> clazz) {
+        //
+    }
 
+    public static void main(String[] args) {
+        System.out.println();
     }
 
 }
