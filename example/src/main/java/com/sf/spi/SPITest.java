@@ -1,4 +1,4 @@
-package com.sf.demo;
+package com.sf.spi;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +13,7 @@ public class SPITest {
      * The location to look for factories.
      * <p>Can be present in multiple JAR files.
      */
+
     public static final String FACTORIES_RESOURCE_LOCATION = "META-INF/services.factories";
     public static void main(String[] args) throws IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
