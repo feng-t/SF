@@ -1,26 +1,23 @@
 package com.sf.app;
 
+import com.sf.bean.BeanFactory;
 import com.sf.paraprocess.ProcessIncomingParameters;
+
 public class Application {
-    private static final Application app = new Application();
-    private static final ProcessIncomingParameters incomingParameters=new ProcessIncomingParameters();
-    private Application() {
-    }
-
-    public static Application getApp() {
-        return app;
-    }
-
-    public static void run(Class<?> clazz, String[] ages) throws Exception {
+    private final ProcessIncomingParameters incomingParameters=new ProcessIncomingParameters();
+    private final Class<?> clazz;
+    private final BeanFactory beanFactory=new BeanFactory();
+    private Application(Class<?> clazz,String[] ages) throws Exception{
         incomingParameters.process(ages);
-        app.run(clazz);
+        this.clazz=clazz;
+        //扫描路径
+        beanFactory.scanPaths(clazz);
+        //加载spi
     }
-    public void run(Class<?> clazz) {
-        //
+    public static void run(Class<?> clazz, String[] ages) throws Exception {
+        new Application(clazz,ages).run();
     }
-
-    public static void main(String[] args) {
-        System.out.println();
+    public void run() throws Exception {
     }
 
 }
