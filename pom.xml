@@ -12,7 +12,6 @@
         <module>croe</module>
         <module>test1</module>
         <module>test2</module>
-        <module>common</module>
         <module>example</module>
     </modules>
 
