@@ -1,7 +1,5 @@
 package com.sf.test;
 
-import com.sf.test1.SPITest;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
