@@ -23,7 +23,7 @@ public abstract class abstractBeanFactory {
                 URL url = resources.nextElement();
                 File file = new File(url.toURI()).getAbsoluteFile();
                 String newPackName = file.getAbsolutePath();
-                newPackName = newPackName.substring(newPackName.indexOf(path));
+                newPackName = newPackName.substring(!newPackName.contains(path) ?0:newPackName.indexOf(path));
                 addClassFiles(file, newPackName);
             }
         } catch (IOException | URISyntaxException e) {
@@ -54,8 +54,8 @@ public abstract class abstractBeanFactory {
 
     public void load() throws Exception {
         for (String s : preBean) {
-            Class<?> aClass = loader.loadClass(s);
             System.out.println("查看:"+s);
+//            Class<?> aClass = loader.loadClass(s);
 
         }
     }

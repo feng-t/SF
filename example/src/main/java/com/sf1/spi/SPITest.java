@@ -1,4 +1,4 @@
-package com.sf.spi;
+package com.sf1.spi;
 
 import java.io.IOException;
 import java.io.InputStream;
