@@ -7,12 +7,14 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
 
 public abstract class abstractBeanFactory {
     private Set<String> preBean=new HashSet<>();
+    private Class<?> clazz;
+    private ClassLoader loader;
     public void scanPaths(Class<?> clazz)  {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        this.clazz=clazz;
+        loader = Thread.currentThread().getContextClassLoader();
         String path = clazz.getPackage().getName().replaceAll("\\.","\\" + File.separator);
         Enumeration<URL> resources = null;
         try {
@@ -43,12 +45,19 @@ public abstract class abstractBeanFactory {
                 if (packName.endsWith(".class")) {
                     packName = packName.replaceAll("\\\\", "\\.").replaceAll("/", "\\.").replaceAll(".class", "");
                     preBean.add(packName);
-                    System.out.println(packName);
                 }
                 //TODO 处理其他后缀
             }
         }
 
+    }
+
+    public void load() throws Exception {
+        for (String s : preBean) {
+            Class<?> aClass = loader.loadClass(s);
+            System.out.println("查看:"+s);
+
+        }
     }
 
 }

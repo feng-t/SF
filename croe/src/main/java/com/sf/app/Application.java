@@ -23,6 +23,11 @@ public class Application {
     }
 
     public void run() {
+        try {
+            beanFactory.load();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
