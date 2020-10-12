@@ -3,8 +3,6 @@ package com.sf.app;
 import com.sf.bean.abstractBeanFactory;
 import com.sf.paraprocess.ProcessIncomingParameters;
 
-import java.io.IOException;
-
 public class Application {
     private final ProcessIncomingParameters incomingParameters = new ProcessIncomingParameters();
     private final Class<?> clazz;
@@ -13,14 +11,11 @@ public class Application {
 
     private Application(Class<?> clazz, String[] ages) {
         this.clazz = clazz;
-        try {
-            incomingParameters.process(ages);
-            //扫描路径
-            beanFactory.scanPaths(clazz);
-            //加载spi
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        //扫描路径
+        beanFactory.scanPaths(clazz);
+        incomingParameters.process(ages);
+        //加载spi
+
     }
 
     public static void run(Class<?> clazz, String[] ages) {
