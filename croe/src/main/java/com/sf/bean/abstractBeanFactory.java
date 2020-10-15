@@ -1,31 +1,28 @@
 package com.sf.bean;
 
-import com.sun.jndi.toolkit.url.Uri;
-
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
 public abstract class abstractBeanFactory {
     private Set<String> preBean = new HashSet<>();
-    private Class<?> clazz;
+    private String packName;
+    private Set<Resource> beanURLs;
 
     public void scanPaths(Class<?> clazz) {
-        this.clazz = clazz;
+        this.packName = clazz.getPackage().getName();
         String path = clazz.getPackage().getName().replaceAll("\\.", "/");
         try {
-            URL[] urls = scanPathsToArray(path);
-            System.out.println("dd");
+            this.beanURLs = scanPathsToArray(path);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public URL[] scanPathsToArray(String path) throws Exception {
-        Set<URL> urls = new HashSet<>();
+    public Set<Resource> scanPathsToArray(String path) throws Exception {
+        Set<Resource> urls = new HashSet<>();
         URL[] packs = getResources(path);
         for (URL pagePath : packs) {
             if (isJarURL(pagePath)) {
@@ -35,29 +32,32 @@ public abstract class abstractBeanFactory {
                 urls.addAll(scanPagePath(pagePath));
             }
         }
-        return urls.toArray(new URL[0]);
+        return urls;
     }
 
-    protected Set<URL> scanPagePath(URL pagePath) throws IOException {
-        return scanFilePath(new File(pagePath.getPath()),new HashSet<>());
+    protected Set<Resource> scanPagePath(URL pagePath) throws IOException {
+        return scanFilePath(new File(pagePath.getPath()), new HashSet<>());
     }
 
-    protected Set<URL> scanJarPath(URL pagePath) {
-        return null;
+    protected Set<Resource> scanJarPath(URL pagePath) {
+        return new HashSet<>(0);
     }
 
-    private Set<URL>  scanFilePath(File file,Set<URL> result) throws IOException {
+    private Set<Resource>  scanFilePath(File file,Set<Resource> result) throws IOException {
         if (!file.canRead()){
             throw new IOException("file can't read");
         }
         if (!file.isDirectory()){
-
-            result.add(file.toURI().toURL());
+            String absolutePath = file.getAbsolutePath();
+            String classPaths = absolutePath.substring(absolutePath.indexOf(packName.replaceAll("\\.", "/")));
+            if (classPaths.endsWith(".class")) {
+                URL url = file.toURI().toURL();
+                result.add(new Resource(url,classPaths.replace(".class","").replaceAll("/","\\.")));
+            }
         }
         for (File dir : listDirectory(file)) {
             scanFilePath(dir,result);
         }
-        System.out.println(file.getName());
         return result;
     }
 
