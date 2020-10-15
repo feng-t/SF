@@ -6,7 +6,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
-public abstract class abstractBeanFactory {
+public abstract class AbstractBeanFactory {
     private Set<String> preBean = new HashSet<>();
     private String packName;
     private Set<Resource> beanURLs;

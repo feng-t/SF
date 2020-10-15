@@ -1,17 +1,17 @@
 package com.sf.app;
 
-import com.sf.bean.abstractBeanFactory;
+import com.sf.bean.AbstractBeanFactory;
+import com.sf.bean.DefaultBeanFactory;
 import com.sf.paraprocess.ProcessIncomingParameters;
 
 public class Application {
     private final ProcessIncomingParameters incomingParameters = new ProcessIncomingParameters();
     private final Class<?> clazz;
-    private final abstractBeanFactory beanFactory = new abstractBeanFactory() {
-    };
+    private final AbstractBeanFactory beanFactory;
 
     private Application(Class<?> clazz, String[] ages) {
         this.clazz = clazz;
-        //扫描路径
+        beanFactory=new DefaultBeanFactory();
         beanFactory.scanPaths(clazz);
         incomingParameters.process(ages);
         //加载spi
