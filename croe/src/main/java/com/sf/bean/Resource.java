@@ -9,4 +9,12 @@ public class Resource {
         this.url=url;
         this.className=packName;
     }
+
+    public String getBeanClassName() {
+        return className;
+    }
+
+    public URL getUrl() {
+        return url;
+    }
 }

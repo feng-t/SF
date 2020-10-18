@@ -23,5 +23,5 @@ public interface AnnotationHandler<T extends Annotation> {
      * 有注解就添加进去
      * @param o
      */
-    void process(Object o);
+    void process(Class<?> o);
 }

@@ -1,4 +1,4 @@
-package com.sf;
+package com.sf1.app;
 
 import com.sf.app.Application;
 

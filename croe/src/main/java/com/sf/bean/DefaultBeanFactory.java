@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Set;
 
 public class DefaultBeanFactory extends BeanFactory {
-    public DefaultBeanFactory(Class<?> clazz) throws IOException {
+    public DefaultBeanFactory(Class<?> clazz) throws Exception {
         super(clazz);
     }
 
@@ -13,4 +13,5 @@ public class DefaultBeanFactory extends BeanFactory {
         FindBeanPath path = new FindBeanPath();
         return path.scanPaths(clazz);
     }
+
 }

@@ -1,22 +1,25 @@
 package com.sf.app;
 
+import com.sf.bean.BeanFactory;
 import com.sf.bean.DefaultBeanFactory;
 import com.sf.paraprocess.ProcessIncomingParameters;
 
-import java.io.IOException;
-
 public class Application {
     private final ProcessIncomingParameters incomingParameters = new ProcessIncomingParameters();
+    private BeanFactory factory;
 
     private Application(Class<?> clazz, String[] ages) {
+        incomingParameters.process(ages);
         try {
-            DefaultBeanFactory factory = new DefaultBeanFactory(clazz);
+            factory = new DefaultBeanFactory(clazz);
             factory.scanPath();
-        }catch (IOException e){
+            //加载spi
+
+
+            factory.preLoad();
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        incomingParameters.process(ages);
-        //加载spi
 
     }
 
