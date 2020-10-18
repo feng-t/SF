@@ -2,26 +2,20 @@ package com.sf.bean;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
-public abstract class AbstractBeanFactory {
-    private Set<String> preBean = new HashSet<>();
+public class FindBeanPath implements ScanPath {
     private String packName;
-    private Set<Resource> beanURLs;
 
-    public void scanPaths(Class<?> clazz) {
+    public Set<Resource> scanPaths(Class<?> clazz) throws IOException {
         this.packName = clazz.getPackage().getName();
         String path = clazz.getPackage().getName().replaceAll("\\.", "/");
-        try {
-            this.beanURLs = scanPathsToArray(path);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        return scanPathsToArray(path);
+
     }
 
-    public Set<Resource> scanPathsToArray(String path) throws Exception {
+    public Set<Resource> scanPathsToArray(String path) throws IOException {
         Set<Resource> urls = new HashSet<>();
         URL[] packs = getResources(path);
         for (URL pagePath : packs) {
@@ -43,20 +37,20 @@ public abstract class AbstractBeanFactory {
         return new HashSet<>(0);
     }
 
-    private Set<Resource>  scanFilePath(File file,Set<Resource> result) throws IOException {
-        if (!file.canRead()){
+    private Set<Resource> scanFilePath(File file, Set<Resource> result) throws IOException {
+        if (!file.canRead()) {
             throw new IOException("file can't read");
         }
-        if (!file.isDirectory()){
+        if (!file.isDirectory()) {
             String absolutePath = file.getAbsolutePath();
             String classPaths = absolutePath.substring(absolutePath.indexOf(packName.replaceAll("\\.", "/")));
             if (classPaths.endsWith(".class")) {
                 URL url = file.toURI().toURL();
-                result.add(new Resource(url,classPaths.replace(".class","").replaceAll("/","\\.")));
+                result.add(new Resource(url, classPaths.replace(".class", "").replaceAll("/", "\\.")));
             }
         }
         for (File dir : listDirectory(file)) {
-            scanFilePath(dir,result);
+            scanFilePath(dir, result);
         }
         return result;
     }
@@ -69,7 +63,8 @@ public abstract class AbstractBeanFactory {
         Arrays.sort(files, Comparator.comparing(File::getName));
         return files;
     }
-    public URL[] getResources(String packageName) throws IOException, URISyntaxException {
+
+    public URL[] getResources(String packageName) throws IOException {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         Enumeration<URL> resources = null;
         Set<URL> urls = new HashSet<>();
@@ -79,14 +74,6 @@ public abstract class AbstractBeanFactory {
             urls.add(url);
         }
         return urls.toArray(new URL[0]);
-    }
-
-    public void load() throws Exception {
-        for (String s : preBean) {
-            System.out.println("查看:" + s);
-//            Class<?> aClass = loader.loadClass(s);
-
-        }
     }
 
     public static boolean isJarURL(URL url) {
