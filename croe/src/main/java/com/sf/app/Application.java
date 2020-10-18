@@ -1,22 +1,20 @@
 package com.sf.app;
 
-import com.sf.bean.BeanFactory;
 import com.sf.bean.DefaultBeanFactory;
 import com.sf.paraprocess.ProcessIncomingParameters;
 
 public class Application {
     private final ProcessIncomingParameters incomingParameters = new ProcessIncomingParameters();
-    private BeanFactory factory;
+    public ApplicationContext applicationContext;
 
     private Application(Class<?> clazz, String[] ages) {
         incomingParameters.process(ages);
         try {
-            factory = new DefaultBeanFactory(clazz);
-            factory.scanPath();
+            applicationContext = new ApplicationContext(new DefaultBeanFactory(clazz));
+            applicationContext.scanPath();
             //加载spi
 
-
-            factory.preLoad();
+            applicationContext.preLoad();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -33,5 +31,6 @@ public class Application {
             e.printStackTrace();
         }
     }
+
 
 }
