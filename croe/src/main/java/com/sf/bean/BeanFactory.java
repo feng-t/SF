@@ -3,6 +3,7 @@ package com.sf.bean;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +53,13 @@ public abstract class BeanFactory {
     }
 
     private <T> T loadBean(Class<T> c) throws Exception {
+        if (c.isAnnotation()){
+            throw new Exception("无法创建注解");
+        }
+        if (Modifier.isAbstract(c.getModifiers())){
+            //抽象类
+        }
+
         //TODO 无法解决子类，接口
         beanState state = getObj(c);
         if (state.obj == null && state.state == statue.start) {
