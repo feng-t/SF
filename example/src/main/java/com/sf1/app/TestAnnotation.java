@@ -13,4 +13,9 @@ public class TestAnnotation {
         AbstractAnnotationHandler<?> test = new test(factory);
         test.verify(c);
     }
+
+    @Override
+    public String toString() {
+        return " TestAnnotation";
+    }
 }

@@ -18,7 +18,7 @@ public class ApplicationContext {
         factory.scanPath();
     }
 
-    public void preLoad() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public void preLoad() throws Exception {
         factory.preLoad();
     }
 }

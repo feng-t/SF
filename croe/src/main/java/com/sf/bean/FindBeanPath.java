@@ -42,8 +42,9 @@ public class FindBeanPath implements ScanPath {
             throw new IOException("file can't read");
         }
         if (!file.isDirectory()) {
-            String absolutePath = file.getAbsolutePath();
-            String classPaths = absolutePath.substring(absolutePath.indexOf(packName.replaceAll("\\.", "/")));
+            String absolutePath = file.getAbsolutePath().replaceAll("\\\\","/");
+            String s = packName.replaceAll("\\.", "/");
+            String classPaths = absolutePath.substring(absolutePath.indexOf(s));
             if (classPaths.endsWith(".class")) {
                 URL url = file.toURI().toURL();
                 result.add(new Resource(url, classPaths.replace(".class", "").replaceAll("/", "\\.")));
@@ -66,9 +67,8 @@ public class FindBeanPath implements ScanPath {
 
     public URL[] getResources(String packageName) throws IOException {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        Enumeration<URL> resources = null;
         Set<URL> urls = new HashSet<>();
-        resources = loader.getResources(packageName);
+        Enumeration<URL> resources = loader.getResources(packageName);
         while (resources.hasMoreElements()) {
             URL url = resources.nextElement();
             urls.add(url);

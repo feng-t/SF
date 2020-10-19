@@ -20,7 +20,7 @@ public abstract class AbstractAnnotationHandler<T extends Annotation> {
      * 验证是否存在注解
      * @param o
      */
-    public void verify(Class<?> o) throws IllegalAccessException, InstantiationException {
+    public void verify(Class<?> o) throws Exception {
         //获取到注解
         T t = o.getAnnotation(getAnnotationClass());
         if (t != null) {
