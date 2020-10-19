@@ -16,6 +16,6 @@ public class test extends AbstractAnnotationHandler<Ann> {
 
     @Override
     public void process(Class<?> c, Object obj, Ann ann) {
-        System.out.println("obj"+obj);
+
     }
 }

@@ -7,6 +7,12 @@ import com.sf.bean.DefaultBeanFactory;
 
 @Ann
 public class TestAnnotation {
+    AppMain appMain;
+    TestAnnotation(AppMain appMain){
+        this.appMain=appMain;
+        System.out.println(" TestAnnotation ");
+    }
+
     public static void main(String[] args) throws Exception {
         Class<?> c= TestAnnotation.class;
         DefaultBeanFactory factory = new DefaultBeanFactory(c);
@@ -16,6 +22,6 @@ public class TestAnnotation {
 
     @Override
     public String toString() {
-        return " TestAnnotation";
+        return " TestAnnotation "+appMain+"\n";
     }
 }

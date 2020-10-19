@@ -10,9 +10,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class BeanFactory {
-    public Set<Resource> classPaths;
-    public Class<?> clazz;
-    public Map<Class<?>, beanState> beans = new ConcurrentHashMap<>();
+    public final Set<Resource> classPaths;
+    public final Class<?> clazz;
+    private final Map<Class<?>, beanState> beans = new ConcurrentHashMap<>();
 
     BeanFactory(Class<?> clazz) throws Exception {
         this.clazz = clazz;
@@ -21,7 +21,7 @@ public abstract class BeanFactory {
 
     public abstract Set<Resource> scanPath() throws IOException;
 
-    public void preLoad() throws Exception  {
+    public void preLoad() throws Exception {
         for (Resource path : classPaths) {
             String beanName = path.getBeanClassName();
             loadBean(Class.forName(beanName));
@@ -37,48 +37,57 @@ public abstract class BeanFactory {
             this.obj = obj;
         }
     }
-    enum statue{
-        start,run
+
+    enum statue {
+        start, run
     }
 
     public <T> T getBean(Class<T> c) throws Exception {
-        beanState state = beans.get(c);
-        if (state == null) {
-            state=new beanState(statue.start,null);
-            beans.put(c,state);
-        }
-        if (state.state==statue.start){
+        beanState state = getObj(c);
+        if (state.state == statue.start) {
             return loadBean(c);
         }
         Object obj = state.obj;
         return (T) obj;
     }
-   private  <T> T loadBean(Class<T> c) throws Exception {
-        beanState state = beans.get(c);
-        if (state.obj==null) {
-            T obj=null;
+
+    private <T> T loadBean(Class<T> c) throws Exception {
+        //TODO 无法解决子类，接口
+        beanState state = getObj(c);
+        if (state.obj == null) {
+            T obj = null;
             Constructor<?>[] constructors = c.getDeclaredConstructors();
             if (constructors.length == 1) {
                 Constructor<?> constructor = constructors[0];
                 Class<?>[] types = constructor.getParameterTypes();
                 if (types.length == 0) {
-                    obj=c.newInstance();
-                }else {
-                    Object[] parameters=new Object[types.length];
+                    obj = c.newInstance();
+                } else {
+                    Object[] parameters = new Object[types.length];
                     for (int i = 0; i < types.length; i++) {
-                        parameters[i]=loadBean(types[i]);
+                        parameters[i] = loadBean(types[i]);
                     }
-                    obj= (T) constructor.newInstance(parameters);
+                    constructor.setAccessible(true);
+                    obj = (T) constructor.newInstance(parameters);
                 }
             }
-            if (obj!=null) {
+            if (obj != null) {
                 state.obj = obj;
                 state.state = statue.run;
             }
             return obj;
-        }else {
+        } else {
             return (T) state.obj;
         }
+    }
+
+    public beanState getObj(Class<?> c) {
+        beanState state = beans.get(c);
+        if (state == null) {
+            state = new beanState(statue.start, null);
+            beans.put(c, state);
+        }
+        return state;
     }
 
 }
