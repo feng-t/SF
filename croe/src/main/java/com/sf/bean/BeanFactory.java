@@ -59,6 +59,9 @@ public abstract class BeanFactory {
         if (Modifier.isAbstract(c.getModifiers())){
             //抽象类
         }
+        if (c.isInterface()){
+            //接口
+        }
 
         //TODO 无法解决子类，接口
         beanState state = getObj(c);
