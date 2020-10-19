@@ -39,7 +39,7 @@ public abstract class BeanFactory {
     }
 
     enum statue {
-        start, run
+        start,init, run
     }
 
     public <T> T getBean(Class<T> c) throws Exception {
@@ -54,7 +54,8 @@ public abstract class BeanFactory {
     private <T> T loadBean(Class<T> c) throws Exception {
         //TODO 无法解决子类，接口
         beanState state = getObj(c);
-        if (state.obj == null) {
+        if (state.obj == null&&state.state==statue.start) {
+            state.state=statue.init;
             T obj = null;
             Constructor<?>[] constructors = c.getDeclaredConstructors();
             if (constructors.length == 1) {
@@ -71,12 +72,14 @@ public abstract class BeanFactory {
                     obj = (T) constructor.newInstance(parameters);
                 }
             }
-            if (obj != null) {
+            if (obj!=null) {
                 state.obj = obj;
                 state.state = statue.run;
             }
             return obj;
-        } else {
+        }else if (state.state==statue.init){
+          throw new Exception("循环依赖 "+c.getName());
+        } else  {
             return (T) state.obj;
         }
     }
