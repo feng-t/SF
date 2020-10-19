@@ -25,7 +25,10 @@ public abstract class BeanFactory {
     public void preLoad() throws Exception {
         for (Resource path : classPaths) {
             String beanName = path.getBeanClassName();
-            loadBean(Class.forName(beanName));
+            Class<?> preferBean = Class.forName(beanName);
+            if (!preferBean.isAnnotation()){
+                loadBean(preferBean);
+            }
         }
     }
 
