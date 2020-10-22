@@ -30,7 +30,7 @@ public class BeanFactory {
     /**
      * 加载全部预加载bean
      */
-    public void loadAllPreBean() throws Exception, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void loadAllPreBean() throws Exception{
         for (Resource resource : resources) {
             loadBean(resource);
         }
