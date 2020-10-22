@@ -19,22 +19,31 @@ public class BeanFactory1 {
     public BeanFactory1(Set<Resource>resourceSet){
         resources.addAll(resourceSet);
     }
+    static {
+        System.out.println("static");
+    }
 
-    public static void main(String[] args) {
-        final BeanFactory1 factory = new BeanFactory1(new HashSet<>());
-        for (int i = 0; i < 30; i++) {
-            factory.preloadBeans.add(new Resource(null,"test"+i));
-        }
-        final Resource peek = factory.preloadBeans.poll();
-        System.out.println();
+    public static void main(String[] args) throws ClassNotFoundException {
+//        final BeanFactory1 factory = new BeanFactory1(new HashSet<>());
+//        for (int i = 0; i < 30; i++) {
+//            factory.preloadBeans.add(new Resource(null,"test"+i));
+//        }
+//        final Resource peek = factory.preloadBeans.poll();
+//        System.out.println();
+
     }
     /**
      * 加载全部预加载bean
      */
     public void loadAllPreBean(){
+        for (Resource resource : resources) {
 
+        }
     }
 
+    public void addBean(Resource resource){
+
+    }
 
     /**
      * 创建bean
