@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -61,11 +62,11 @@ public abstract class BeanFactory {
         }
         if (Modifier.isAbstract(c.getModifiers())){
             //抽象类
+
         }
         if (c.isInterface()){
             //接口
         }
-
         //TODO 无法解决子类，接口
         beanState state = getObj(c);
         if (state.obj == null && state.state == statue.start) {
@@ -98,10 +99,32 @@ public abstract class BeanFactory {
         }
     }
 
+    /**
+     * 创建bean
+     * @param beanClass
+     * @param parameters
+     * @param <T>
+     * @return
+     * @throws NoSuchMethodException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws InstantiationException
+     */
+    public <T> T createBean(Class<T>beanClass,Object... parameters) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<?>[] classes = new Class<?>[parameters.length];
+        for (int i = 0; i < parameters.length; i++) {
+            classes[i]=parameters.getClass();
+        }
+        Constructor<T> constructor = beanClass.getDeclaredConstructor(classes);
+        return constructor.newInstance(parameters);
+    }
+
     public beanState getObj(Class<?> c) {
         beanState state = beans.get(c);
         if (state == null) {
-            state = new beanState(statue.start, null);
+            synchronized (this) {
+                state = new beanState(statue.start, null);
+            }
             beans.put(c, state);
         }
         return state;
