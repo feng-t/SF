@@ -1,12 +1,12 @@
 package com.sf.annotation.handler;
 
-import com.sf.annotation.Ann;
 import com.sf.bean.BeanFactory;
 
 import java.lang.annotation.Annotation;
 
 public abstract class AbstractAnnotationHandler<T extends Annotation> {
     private BeanFactory factory;
+    //入参可能会改成application
     public AbstractAnnotationHandler(BeanFactory factory) {
         this.factory=factory;
     }

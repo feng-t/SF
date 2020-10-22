@@ -3,7 +3,7 @@ package com.sf.bean;
 import java.io.IOException;
 import java.util.Set;
 
-public class DefaultBeanFactory extends BeanFactory {
+public class DefaultBeanFactory extends BeanFactory2 {
     public DefaultBeanFactory(Class<?> clazz) throws Exception {
         super(clazz);
     }

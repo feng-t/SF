@@ -1,5 +1,6 @@
 package com.sf.bean;
 
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -7,25 +8,28 @@ public class Resource implements Comparable<Resource>{
     private final URL url;
     private final String className;
     private Class<?> beanClass;
-    private final int constructorNum;
+    private Constructor<?>[] constructors;
     private final int minParameterNum;
     private final int maxParameterNum;
     private AtomicInteger count=new AtomicInteger(0);
 
     public Resource(URL url,String className)  {
-        this(url,className,1);
+        this(url,className,0,0);
     }
-    public Resource(URL url,String className,int constructorNum)  {
-        this(url,className,constructorNum,0,0);
-    }
-    public Resource(URL url,String className,int constructorNum,int maxParameterNum,int minParameterNum) {
+    public Resource(URL url,String className,int maxParameterNum,int minParameterNum) {
         this.url=url;
         this.className=className;
-        this.constructorNum=constructorNum;
         this.maxParameterNum=maxParameterNum;
         this.minParameterNum=minParameterNum;
     }
 
+
+    public synchronized Constructor<?>[] getConstructors() throws ClassNotFoundException {
+        if (constructors==null){
+            constructors = getBeanClass().getDeclaredConstructors();
+        }
+        return constructors;
+    }
 
     public synchronized Class<?> getBeanClass() throws ClassNotFoundException {
         if (beanClass==null){

@@ -1,106 +1,81 @@
 package com.sf.bean;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.stream.Stream;
 
-public abstract class BeanFactory {
-    public final Set<Resource> classPaths;
-    public final Class<?> clazz;
-    private final Map<Class<?>, beanState> beans = new ConcurrentHashMap<>();
 
-    BeanFactory(Class<?> clazz) throws Exception {
-        this.clazz = clazz;
-        classPaths = scanPath();
-    }
+public class BeanFactory {
+    private final Set<Resource> resources = ConcurrentHashMap.newKeySet();
 
-    public abstract Set<Resource> scanPath() throws IOException;
+    private final Queue<Resource> preloadBeans = new PriorityBlockingQueue<>();
+    private final Map<Class<?>, Object> beanMap = new ConcurrentHashMap<>();
+    private final Map<Class<?>,Resource> preLoadResource = new ConcurrentHashMap<>();
 
-    public void preLoad() throws Exception {
-        for (Resource path : classPaths) {
-            String beanName = path.getBeanClassName();
-            Class<?> preferBean = Class.forName(beanName);
-            if (!preferBean.isAnnotation()){
-                loadBean(preferBean);
-            }
+
+    public BeanFactory(Set<Resource> resourceSet) throws ClassNotFoundException {
+        resources.addAll(resourceSet);
+        for (Resource resource : resources) {
+            final Class<?> beanClass = resource.getBeanClass();
+            preLoadResource.put(beanClass,resource);
         }
     }
 
-    static class beanState {
-        public statue state;
-        public Object obj;
-
-        beanState(statue state, Object obj) {
-            this.state = state;
-            this.obj = obj;
-        }
-    }
-
-    enum statue {
-        start, init, run
-    }
-
-    public <T> T getBean(Class<T> c) throws Exception {
-        beanState state = getObj(c);
-        if (state.state == statue.start) {
-            return loadBean(c);
-        }
-        Object obj = state.obj;
-        return (T) obj;
-    }
-
-    private <T> T loadBean(Class<T> c) throws Exception {
-        if (c.isAnnotation()){
-            throw new Exception("无法创建注解");
-        }
-        if (Modifier.isAbstract(c.getModifiers())){
-            //抽象类
-
-        }
-        if (c.isInterface()){
-            //接口
-        }
-        //TODO 无法解决子类，接口
-        beanState state = getObj(c);
-        if (state.obj == null && state.state == statue.start) {
-            state.state = statue.init;
-            T obj = null;
-            Constructor<?>[] constructors = c.getDeclaredConstructors();
-            if (constructors.length == 1) {
-                Constructor<?> constructor = constructors[0];
-                Class<?>[] types = constructor.getParameterTypes();
-                if (types.length == 0) {
-                    obj = c.newInstance();
-                } else {
-                    Object[] parameters = new Object[types.length];
-                    for (int i = 0; i < types.length; i++) {
-                        parameters[i] = loadBean(types[i]);
-                    }
-                    constructor.setAccessible(true);
-                    obj = (T) constructor.newInstance(parameters);
-                }
-            }
-            if (obj != null) {
-                state.obj = obj;
-                state.state = statue.run;
-            }
-            return obj;
-        } else if (state.state == statue.init) {
-            throw new Exception("循环依赖 " + c.getName());
-        } else {
-            return (T) state.obj;
-        }
-    }
 
     /**
+     * 加载全部预加载bean
+     */
+    public void loadAllPreBean() throws Exception, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        for (Resource resource : resources) {
+            loadBean(resource);
+        }
+    }
+
+    public Object loadBean(Class<?> preBean)throws Exception{
+       return loadBean(preLoadResource.get(preBean));
+    }
+    public Object loadBean(Resource resource) throws Exception{
+        resource.addCount();
+        Object obj = null;
+        Class<?> beanClass = resource.getBeanClass();
+        Constructor<?>[] constructors = resource.getConstructors();
+        if (constructors.length == 1) {
+            Constructor<?> constructor = constructors[0];
+            Class<?>[] types = constructor.getParameterTypes();
+            if (types.length == 0) {
+                obj=createBean(beanClass);
+            }else {
+                final Object[] parameters = new Object[types.length];
+                for (int i = 0; i < types.length; i++) {
+                    final Class<?> type = types[i];
+                    final Resource res = preLoadResource.get(type);
+                    final int count = res.getCount();
+                    if (count>=resource.getCount()&&getBean(type)==null){
+                        throw new Exception(type+"产生循环依赖，无法创建bean");
+                    }
+                    final Object bean = getBean(type);
+                    parameters[i]=bean==null?bean:loadBean(type);
+                }
+                obj=createBean(beanClass,parameters);
+            }
+        }
+        //TODO 多个构造函数的情况
+        if (obj!=null){
+            beanMap.put(beanClass,obj);
+        }else {
+            //将创建失败的加载到预加载，后面可能会删除
+            preloadBeans.offer(resource);
+        }
+        return obj;
+    }
+    /**
      * 创建bean
+     *
      * @param beanClass
      * @param parameters
      * @param <T>
@@ -110,24 +85,25 @@ public abstract class BeanFactory {
      * @throws InvocationTargetException
      * @throws InstantiationException
      */
-    public <T> T createBean(Class<T>beanClass,Object... parameters) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        Class<?>[] classes = new Class<?>[parameters.length];
-        for (int i = 0; i < parameters.length; i++) {
-            classes[i]=parameters.getClass();
-        }
-        Constructor<T> constructor = beanClass.getDeclaredConstructor(classes);
+    public <T> T createBean(Class<T> beanClass, Object... parameters) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<?>[] paraClass = Stream.of(parameters).map(Object::getClass).toArray(Class[]::new);
+        Constructor<T> constructor = beanClass.getDeclaredConstructor(paraClass);
+        constructor.setAccessible(true);
         return constructor.newInstance(parameters);
     }
 
-    public beanState getObj(Class<?> c) {
-        beanState state = beans.get(c);
-        if (state == null) {
-            synchronized (this) {
-                state = new beanState(statue.start, null);
-            }
-            beans.put(c, state);
-        }
-        return state;
+    /**
+     * @param beanClass bean的class
+     * @param <T>       返回类型
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getBean(Class<T> beanClass) {
+        return (T) beanMap.get(beanClass);
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> T getBean(String beanClass) throws ClassNotFoundException {
+        return (T) getBean(Class.forName(beanClass));
+    }
 }

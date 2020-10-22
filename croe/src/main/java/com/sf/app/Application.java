@@ -1,6 +1,7 @@
 package com.sf.app;
 
-import com.sf.bean.DefaultBeanFactory;
+import com.sf.bean.BeanFactory;
+import com.sf.bean.FindBeanPath;
 import com.sf.paraprocess.ProcessIncomingParameters;
 
 public class Application {
@@ -10,11 +11,10 @@ public class Application {
     private Application(Class<?> clazz, String[] ages) {
         incomingParameters.process(ages);
         try {
-            applicationContext = new ApplicationContext(new DefaultBeanFactory(clazz));
-            applicationContext.scanPath();
+            final BeanFactory factory = new BeanFactory(new FindBeanPath().scanPaths(clazz));
+            applicationContext = new ApplicationContext(factory);
             //加载spi
-
-            applicationContext.preLoad();
+            applicationContext.load();
         } catch (Exception e) {
             e.printStackTrace();
         }
