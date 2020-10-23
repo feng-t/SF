@@ -8,7 +8,7 @@ import com.sf.bean.FindBeanPath;
 //@Ann
 public class TestAnnotation {
     AppMain appMain;
-    TestAnnotation(AppMain appMain){
+    TestAnnotation(AppMain appMain,String str){
         this.appMain=appMain;
     }
 
