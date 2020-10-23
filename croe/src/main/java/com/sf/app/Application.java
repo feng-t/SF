@@ -12,16 +12,13 @@ import java.util.Set;
 public class Application {
     private final ProcessIncomingParameters incomingParameters = new ProcessIncomingParameters();
     public ApplicationContext applicationContext;
-
+    public FindBeanPath path;
     private Application(Class<?> clazz, String[] ages) {
         incomingParameters.process(ages);
         try {
-            FindBeanPath path = new FindBeanPath();
+            path = new FindBeanPath();
             final BeanFactory factory = new BeanFactory(path.scanPaths(clazz));
             applicationContext = new ApplicationContext(factory);
-            applicationContext.load();
-            //注解处理
-            annotationHandler(path,new AnnotationManagement(applicationContext));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -43,6 +40,9 @@ public class Application {
 
     public void run() {
         try {
+            applicationContext.load();
+            //注解处理
+            annotationHandler(path,new AnnotationManagement(applicationContext));
         } catch (Exception e) {
             e.printStackTrace();
         }
