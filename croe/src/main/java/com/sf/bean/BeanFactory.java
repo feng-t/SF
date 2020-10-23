@@ -19,13 +19,15 @@ public class BeanFactory {
 
 
     public BeanFactory(Set<Resource> resourceSet) throws ClassNotFoundException {
+        addResource(resourceSet);
+    }
+    public void addResource(Set<Resource> resourceSet) throws ClassNotFoundException {
         resources.addAll(resourceSet);
         for (Resource resource : resources) {
             final Class<?> beanClass = resource.getBeanClass();
             preLoadResource.put(beanClass,resource);
         }
     }
-
 
     /**
      * 加载全部预加载bean
@@ -59,7 +61,7 @@ public class BeanFactory {
                         throw new Exception(type+"产生循环依赖，无法创建bean");
                     }
                     final Object bean = getBean(type);
-                    parameters[i]=bean==null?bean:loadBean(type);
+                    parameters[i]=bean!=null?bean:loadBean(type);
                 }
                 obj=createBean(beanClass,parameters);
             }
@@ -105,5 +107,13 @@ public class BeanFactory {
     @SuppressWarnings("unchecked")
     public <T> T getBean(String beanClass) throws ClassNotFoundException {
         return (T) getBean(Class.forName(beanClass));
+    }
+
+    public Object[] getBeans() {
+        return beanMap.values().toArray();
+    }
+    public Class<?>[] getBeanClass(){
+        Set<Class<?>> set = beanMap.keySet();
+        return set.toArray(new Class<?>[0]);
     }
 }
