@@ -1,21 +1,21 @@
 package com.sf.bean;
 
+import com.sf.annotation.Bean;
 import com.sf.annotation.InitCreate;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.lang.reflect.Method;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Stream;
 
 
 public class BeanFactory {
-    private final Set<Resource> resources = ConcurrentHashMap.newKeySet();
 
-    private final Queue<Resource> preloadBeans = new PriorityBlockingQueue<>();
+    private final Set<Resource> resources = ConcurrentHashMap.newKeySet();
+    private final Queue<Resource> preLoad = new PriorityBlockingQueue<>();
     private final Map<Class<?>, Object> beanMap = new ConcurrentHashMap<>();
     private final Map<Class<?>, Resource> preLoadResource = new ConcurrentHashMap<>();
 
@@ -25,30 +25,52 @@ public class BeanFactory {
     }
 
     public void addResource(Set<Resource> resourceSet) throws ClassNotFoundException {
+        preLoad.addAll(resourceSet);
         resources.addAll(resourceSet);
         for (Resource resource : resources) {
             final Class<?> beanClass = resource.getBeanClass();
             preLoadResource.put(beanClass, resource);
         }
     }
+//
+//    public void loadAndCreateBean() throws Exception {
+//        while (!preLoad.isEmpty()){
+//            Resource peek = preLoad.poll();
+//            Object bean = loadBean1(peek);
+//            if (bean==null){
+//                preLoad.offer(peek);
+//            }else {
+//                beanMap.put(peek.getBeanClass(),bean);
+//            }
+//        }
+//    }
+//
+//    private Object loadBean1(Resource peek) {
+//
+//        return null;
+//    }
+
 
     /**
      * 加载全部预加载bean
      */
     public void loadAllPreBean() throws Exception {
-        for (Resource resource : resources) {
-            loadBean(resource);
+        while (!preLoad.isEmpty()) {
+            loadBean(preLoad.poll());
         }
     }
 
-    public Object loadBean(Class<?> preBean) throws Exception {
+    private Object loadBean(Class<?> preBean) throws Exception {
         return loadBean(preLoadResource.get(preBean));
     }
 
-    public Object loadBean(Resource resource) throws Exception {
-        resource.addCount();
-        Object obj = null;
+    private Object loadBean(Resource resource) throws Exception {
         Class<?> beanClass = resource.getBeanClass();
+        Object obj = beanMap.get(beanClass);
+        if (obj != null) {
+            return obj;
+        }
+        resource.addCount();
         if (beanClass.isAnnotation() || beanClass.isEnum()) {
             return null;
         }
@@ -60,24 +82,24 @@ public class BeanFactory {
                 if (types.length == 0) {
                     obj = createBean(beanClass);
                 } else {
-                    obj = createBean(beanClass, getParameter(resource, types));
+                    obj = getParameter(resource, types);
                 }
             } else {
                 final InitCreate create;
                 if ((create = beanClass.getAnnotation(InitCreate.class)) != null) {
                     Class<?>[] parameters = create.parameters();
-                    Object[] parametersObj = getParameter(resource, parameters);
-                    obj = createBean(beanClass, parametersObj);
+                    obj= getParameter(resource, parameters);
+//                    obj = createBean(beanClass, parametersObj);
                 }
             }
         } else {
+            //父子类
             for (Resource res : resources) {
                 final Class<?> resBeanClass = res.getBeanClass();
                 if (beanClass.isAssignableFrom(resBeanClass)
                         && resBeanClass != beanClass
                         && !resBeanClass.isInterface()
-                        && !resBeanClass.isAnnotation()
-                ){
+                        && !resBeanClass.isAnnotation()) {
                     obj = loadBean(res);
                     break;
                 }
@@ -85,30 +107,62 @@ public class BeanFactory {
         }
         if (obj != null) {
             beanMap.put(beanClass, obj);
-        } else {
-            //将创建失败的加载到预加载，后面可能会删除
-            preloadBeans.offer(resource);
-            throw new Exception("创建失败");
+            addCreateBeanMethod(beanClass, obj);
         }
         return obj;
     }
 
-    private Object[] getParameter(Resource resource, Class<?>[] types) throws Exception {
+
+    private Object getParameter(Resource resource, Class<?>[] types) throws Exception {
         final Object[] parameters = new Object[types.length];
+        boolean tar=true;
         for (int i = 0; i < types.length; i++) {
             final Class<?> type = types[i];
+            final Object bean = beanMap.get(type);
             final Resource res = preLoadResource.get(type);
             if (res == null) {
-                throw new Exception("无法找到bean: " + type);
+                tar=false;
+                break;
             }
             final int count = res.getCount();
-            final Object bean = getBean(type);
             if (count >= resource.getCount() && bean == null) {
                 throw new Exception(type + "产生循环依赖，无法创建bean");
             }
             parameters[i] = bean != null ? bean : loadBean(type);
         }
-        return parameters;
+        Object obj = beanMap.get(resource.getBeanClass());
+        if (obj!=null){
+            return obj;
+        } else {
+            if (tar){
+                obj = createBean(resource.getBeanClass(), parameters);
+            }else {
+                //
+                System.err.println("没有创建成功");
+                preLoad.add(resource);
+            }
+        }
+        return obj;
+    }
+
+    private void addCreateBeanMethod(Class<?> beanClass, Object obj) throws Exception {
+        if (obj == null) {
+            return;
+        }
+        final Method[] methods = beanClass.getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.getDeclaredAnnotation(Bean.class) != null) {
+                final Class<?> type = method.getReturnType();
+                if (beanMap.get(type) != null) {
+                    return;
+                }
+                if (type != Void.TYPE) {
+                    beanMap.put(type, method.invoke(obj));
+                } else {
+                    throw new Exception("被@Bean声明的方法必须有返回值");
+                }
+            }
+        }
     }
 
     /**
@@ -136,12 +190,16 @@ public class BeanFactory {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T> T getBean(Class<T> beanClass) {
-        return (T) beanMap.get(beanClass);
+    public <T> T getBean(Class<T> beanClass) throws Exception {
+        T o = (T) beanMap.get(beanClass);
+        if (o == null) {
+            o = (T) loadBean(beanClass);
+        }
+        return o;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getBean(String beanClass) throws ClassNotFoundException {
+    public <T> T getBean(String beanClass) throws Exception {
         return (T) getBean(Class.forName(beanClass));
     }
 
@@ -149,8 +207,25 @@ public class BeanFactory {
         return beanMap.values().toArray();
     }
 
-    public Class<?>[] getBeanClass() {
-        Set<Class<?>> set = beanMap.keySet();
-        return set.toArray(new Class<?>[0]);
+    public List<Class<?>> getBeanClass() throws Exception {
+        List<Class<?>> list = new ArrayList<>();
+        for (Resource resource : resources) {
+            Class<?> resourceBeanClass = resource.getBeanClass();
+            if (resourceBeanClass != null) {
+                list.add(resourceBeanClass);
+            }
+        }
+        return list;
+    }
+
+    public <T> List<Class<? extends T>> getBeanClass(Class<T> c) throws Exception {
+        List<Class<?>> beanClass = getBeanClass();
+        List<Class<? extends T>> classes = new ArrayList<>();
+        for (Class<?> aClass : beanClass) {
+            if (c.isAssignableFrom(aClass)) {
+                classes.add((Class<? extends T>) aClass);
+            }
+        }
+        return classes;
     }
 }

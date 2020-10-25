@@ -2,8 +2,14 @@ package com.sf.bean;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.JarURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class FindBeanPath implements ScanPath {
     private String packName;
@@ -33,9 +39,18 @@ public class FindBeanPath implements ScanPath {
         return scanFilePath(new File(pagePath.getPath()), new HashSet<>());
     }
 
-    protected Set<Resource> scanJarPath(URL pagePath) {
-        return new HashSet<>(0);
+    protected Set<Resource> scanJarPath(URL pagePath) throws IOException {
+        final URLConnection conn = pagePath.openConnection();
+        if (conn instanceof JarURLConnection){
+            JarURLConnection jarConn = (JarURLConnection) conn;
+            JarFile file = jarConn.getJarFile();
+            final JarEntry test = file.getJarEntry("test");
+//            test.
+
+        }
+        return new HashSet<>();
     }
+
 
     private Set<Resource> scanFilePath(File file, Set<Resource> result) throws IOException {
         if (!file.canRead()) {

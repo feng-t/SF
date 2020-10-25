@@ -1,5 +1,6 @@
 package com.sf1.app;
 
+import com.sf.annotation.Bean;
 import com.sf.app.Application;
 
 @Ann
@@ -12,5 +13,8 @@ public class AppMain {
     public String toString() {
         return "appMain toString";
     }
-
+    @Bean
+    public TestAnnotation get(){
+        return new TestAnnotation(this,"test");
+    }
 }

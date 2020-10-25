@@ -4,6 +4,7 @@ import com.sf.annotation.handler.AbstractAnnotationHandler;
 import com.sf.app.ApplicationContext;
 import com.sf.bean.BeanFactory;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,7 +33,7 @@ public class AnnotationManagement {
                 addToHandler((AbstractAnnotationHandler<?>) factory.getBean(beanClass));
             }
         }
-        Class<?>[] classes = factory.getBeanClass();
+        List<Class<?>> classes = factory.getBeanClass();
         for (Class<?> c : classes) {
             for (AbstractAnnotationHandler<?> handler : handlers) {
                 handler.verify(c,factory);
