@@ -138,7 +138,7 @@ public class BeanFactory {
                 obj = createBean(resource.getBeanClass(), parameters);
             }else {
                 //
-                System.err.println("没有创建成功");
+                System.err.println("没有创建成功"+resource.getBeanClass());
                 preLoad.add(resource);
             }
         }
@@ -151,7 +151,7 @@ public class BeanFactory {
         }
         final Method[] methods = beanClass.getDeclaredMethods();
         for (Method method : methods) {
-            if (method.getDeclaredAnnotation(Bean.class) != null) {
+            if (method.isAnnotationPresent(Bean.class) ) {
                 final Class<?> type = method.getReturnType();
                 if (beanMap.get(type) != null) {
                     return;

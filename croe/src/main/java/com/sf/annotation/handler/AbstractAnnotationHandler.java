@@ -1,10 +1,15 @@
 package com.sf.annotation.handler;
 
+import com.sf.app.ApplicationContext;
 import com.sf.bean.BeanFactory;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
-public abstract class AbstractAnnotationHandler<T extends Annotation> {
+public abstract class AbstractAnnotationHandler<T extends Annotation> implements AnnotationHandler{
+    private ApplicationContext context;
+
     /**
      * 获取注解的class
      * @return class<T>
@@ -12,20 +17,36 @@ public abstract class AbstractAnnotationHandler<T extends Annotation> {
     public abstract Class<T> getAnnotationClass();
 
 
-    /**
-     * 有注解就添加进去
-     * @param c
-     */
-   public abstract void process(Class<?> c,Object obj,T t);
+
     /**
      * 验证是否存在注解
-     * @param o
+     * @param targetClass
      */
-    public void verify(Class<?> o,BeanFactory factory) throws Exception {
+    public void verify(Class<?> targetClass,BeanFactory factory) throws Exception {
         //获取到注解
-        T t = o.getAnnotation(getAnnotationClass());
-        if (t != null) {
-            process(o,factory.getBean(o),  t);
+        Class<T> annotationClass = getAnnotationClass();
+        Object bean = factory.getBean(targetClass);
+        if (targetClass.isAnnotationPresent(annotationClass)) {
+            process(targetClass,bean);
         }
+        for (Method method : targetClass.getDeclaredMethods()) {
+            if (method.isAnnotationPresent(annotationClass)){
+                process(targetClass,bean,method);
+            }
+        }
+        for (Field field : targetClass.getDeclaredFields()) {
+            if (field.isAnnotationPresent(annotationClass)){
+                process(targetClass,bean,field);
+            }
+        }
+
+    }
+
+    public void addContext(ApplicationContext context){
+        this.context=context;
+    }
+
+    public ApplicationContext getContext() {
+        return context;
     }
 }

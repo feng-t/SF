@@ -18,10 +18,15 @@ public class FindBeanPath implements ScanPath {
         this.packName = clazz.getPackage().getName();
         String path = clazz.getPackage().getName().replaceAll("\\.", "/");
         return scanPathsToArray(path);
-
+    }
+    public Set<Resource> scanPaths(String pagePaths)throws IOException{
+        if (pagePaths==null){
+            return new HashSet<>();
+        }
+        return scanPathsToArray(pagePaths.replaceAll("\\.","/"));
     }
 
-    public Set<Resource> scanPathsToArray(String path) throws IOException {
+    private Set<Resource> scanPathsToArray(String path) throws IOException {
         Set<Resource> urls = new HashSet<>();
         URL[] packs = getResources(path);
         for (URL pagePath : packs) {
@@ -39,15 +44,16 @@ public class FindBeanPath implements ScanPath {
         return scanFilePath(new File(pagePath.getPath()), new HashSet<>());
     }
 
+    //TODO jar
     protected Set<Resource> scanJarPath(URL pagePath) throws IOException {
-        final URLConnection conn = pagePath.openConnection();
-        if (conn instanceof JarURLConnection){
-            JarURLConnection jarConn = (JarURLConnection) conn;
-            JarFile file = jarConn.getJarFile();
-            final JarEntry test = file.getJarEntry("test");
-//            test.
-
-        }
+//        final URLConnection conn = pagePath.openConnection();
+//        if (conn instanceof JarURLConnection){
+//            JarURLConnection jarConn = (JarURLConnection) conn;
+//            JarFile file = jarConn.getJarFile();
+//            final JarEntry test = file.getJarEntry("test");
+////            test.
+//
+//        }
         return new HashSet<>();
     }
 
