@@ -12,10 +12,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class FindBeanPath implements ScanPath {
-    private String packName;
 
     public Set<Resource> scanPaths(Class<?> clazz) throws IOException {
-        this.packName = clazz.getPackage().getName();
         String path = clazz.getPackage().getName().replaceAll("\\.", "/");
         return scanPathsToArray(path);
     }
@@ -32,20 +30,20 @@ public class FindBeanPath implements ScanPath {
         for (URL pagePath : packs) {
             if (isJarURL(pagePath)) {
                 //jar
-                urls.addAll(scanJarPath(pagePath));
+                urls.addAll(scanJarPath(pagePath,path));
             } else {
-                urls.addAll(scanPagePath(pagePath));
+                urls.addAll(scanPagePath(pagePath,path));
             }
         }
         return urls;
     }
 
-    protected Set<Resource> scanPagePath(URL pagePath) throws IOException {
-        return scanFilePath(new File(pagePath.getPath()), new HashSet<>());
+    protected Set<Resource> scanPagePath(URL pagePath,String path) throws IOException {
+        return scanFilePath(new File(pagePath.getPath()), new HashSet<>(),path);
     }
 
     //TODO jar
-    protected Set<Resource> scanJarPath(URL pagePath) throws IOException {
+    protected Set<Resource> scanJarPath(URL pagePath,String path) throws IOException {
 //        final URLConnection conn = pagePath.openConnection();
 //        if (conn instanceof JarURLConnection){
 //            JarURLConnection jarConn = (JarURLConnection) conn;
@@ -58,13 +56,13 @@ public class FindBeanPath implements ScanPath {
     }
 
 
-    private Set<Resource> scanFilePath(File file, Set<Resource> result) throws IOException {
+    private Set<Resource> scanFilePath(File file, Set<Resource> result,String path) throws IOException {
         if (!file.canRead()) {
             throw new IOException("file can't read");
         }
         if (!file.isDirectory()) {
             String absolutePath = file.getAbsolutePath().replaceAll("\\\\","/");
-            String s = packName.replaceAll("\\.", "/");
+            String s = path.replaceAll("\\.", "/");
             String classPaths = absolutePath.substring(absolutePath.indexOf(s));
             if (classPaths.endsWith(".class")) {
                 URL url = file.toURI().toURL();
@@ -72,7 +70,7 @@ public class FindBeanPath implements ScanPath {
             }
         }
         for (File dir : listDirectory(file)) {
-            scanFilePath(dir, result);
+            scanFilePath(dir, result,path);
         }
         return result;
     }
