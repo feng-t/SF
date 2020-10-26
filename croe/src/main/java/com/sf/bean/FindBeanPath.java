@@ -38,12 +38,12 @@ public class FindBeanPath implements ScanPath {
         return urls;
     }
 
-    protected Set<Resource> scanPagePath(URL pagePath,String path) throws IOException {
+    private Set<Resource> scanPagePath(URL pagePath,String path) throws IOException {
         return scanFilePath(new File(pagePath.getPath()), new HashSet<>(),path);
     }
 
     //TODO jar
-    protected Set<Resource> scanJarPath(URL pagePath,String path) throws IOException {
+    private Set<Resource> scanJarPath(URL pagePath,String path) throws IOException {
 //        final URLConnection conn = pagePath.openConnection();
 //        if (conn instanceof JarURLConnection){
 //            JarURLConnection jarConn = (JarURLConnection) conn;
@@ -75,7 +75,7 @@ public class FindBeanPath implements ScanPath {
         return result;
     }
 
-    protected File[] listDirectory(File dir) {
+    private File[] listDirectory(File dir) {
         File[] files = dir.listFiles();
         if (files == null) {
             return new File[0];
@@ -84,7 +84,7 @@ public class FindBeanPath implements ScanPath {
         return files;
     }
 
-    public URL[] getResources(String packageName) throws IOException {
+    private URL[] getResources(String packageName) throws IOException {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         Set<URL> urls = new HashSet<>();
         Enumeration<URL> resources = loader.getResources(packageName);
@@ -95,7 +95,7 @@ public class FindBeanPath implements ScanPath {
         return urls.toArray(new URL[0]);
     }
 
-    public static boolean isJarURL(URL url) {
+    private static boolean isJarURL(URL url) {
         String protocol = url.getProtocol();
         return ("JAR".equalsIgnoreCase(protocol) || "WAR".equalsIgnoreCase(protocol));
     }
