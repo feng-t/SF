@@ -1,7 +1,8 @@
-package com.sf.bean;
+package com.sf.bean.factory;
 
 import com.sf.annotation.Bean;
 import com.sf.annotation.InitCreate;
+import com.sf.bean.Resource;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -12,7 +13,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Stream;
 
 
-public class BeanFactory {
+public class ParentBeanFactory {
 
     private final Set<Resource> resources = ConcurrentHashMap.newKeySet();
     private final Queue<Resource> preLoad = new PriorityBlockingQueue<>();
@@ -20,7 +21,7 @@ public class BeanFactory {
     private final Map<Class<?>, Resource> preLoadResource = new ConcurrentHashMap<>();
 
 
-    public BeanFactory(Set<Resource> resourceSet) throws ClassNotFoundException {
+    public ParentBeanFactory(Set<Resource> resourceSet) throws ClassNotFoundException {
         addResource(resourceSet);
     }
 
@@ -60,11 +61,11 @@ public class BeanFactory {
         }
     }
 
-    private Object loadBean(Class<?> preBean) throws Exception {
+    public Object loadBean(Class<?> preBean) throws Exception {
         return loadBean(preLoadResource.get(preBean));
     }
 
-    private Object loadBean(Resource resource) throws Exception {
+    public Object loadBean(Resource resource) throws Exception {
         Class<?> beanClass = resource.getBeanClass();
         Object obj = beanMap.get(beanClass);
         if (obj != null) {
@@ -85,15 +86,15 @@ public class BeanFactory {
                     obj = getParameter(resource, types);
                 }
             } else {
-                final InitCreate create;
-                if ((create = beanClass.getAnnotation(InitCreate.class)) != null) {
+                final InitCreate create=beanClass.getAnnotation(InitCreate.class);
+                if (create != null) {
                     Class<?>[] parameters = create.parameters();
                     obj= getParameter(resource, parameters);
 //                    obj = createBean(beanClass, parametersObj);
                 }
             }
         } else {
-            //父子类
+            //接口
             for (Resource res : resources) {
                 final Class<?> resBeanClass = res.getBeanClass();
                 if (beanClass.isAssignableFrom(resBeanClass)

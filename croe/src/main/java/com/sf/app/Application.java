@@ -1,7 +1,8 @@
 package com.sf.app;
 
 import com.sf.annotation.AnnotationManagement;
-import com.sf.bean.BeanFactory;
+import com.sf.bean.factory.DefaultBeanFactory;
+import com.sf.bean.factory.ParentBeanFactory;
 import com.sf.bean.FindBeanPath;
 import com.sf.bean.Resource;
 import com.sf.exception.ExceptionHandler;
@@ -22,7 +23,7 @@ public class Application {
         incomingParameters.process(ages);
         try {
             path = new FindBeanPath();
-            final BeanFactory factory = new BeanFactory(path.scanPaths(clazz));
+            final ParentBeanFactory factory = new DefaultBeanFactory(path.scanPaths(clazz));
             applicationContext = new ApplicationContext(factory);
             scanException(factory);
             //
@@ -32,7 +33,7 @@ public class Application {
 
     }
 
-    private void scanException(BeanFactory factory) throws Exception {
+    private void scanException(ParentBeanFactory factory) throws Exception {
         exception = factory.getBeanClass(GlobalException.class);
     }
 

@@ -2,7 +2,7 @@ package com.sf.annotation;
 
 import com.sf.annotation.handler.AbstractAnnotationHandler;
 import com.sf.app.ApplicationContext;
-import com.sf.bean.BeanFactory;
+import com.sf.bean.factory.ParentBeanFactory;
 
 import java.lang.reflect.Modifier;
 import java.util.List;
@@ -44,7 +44,7 @@ public class AnnotationManagement {
      * 处理
      */
     public void handler() throws Exception {
-        BeanFactory factory = context.getFactory();
+        ParentBeanFactory factory = context.getFactory();
         for (Class<?> beanClass : factory.getBeanClass()) {
             if (AbstractAnnotationHandler.class.isAssignableFrom(beanClass) && beanClass != AbstractAnnotationHandler.class) {
                 AbstractAnnotationHandler<?> handler = (AbstractAnnotationHandler<?>) factory.getBean(beanClass);

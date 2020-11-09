@@ -1,7 +1,7 @@
 package com.sf.annotation.handler;
 
 import com.sf.annotation.Autowired;
-import com.sf.bean.BeanFactory;
+import com.sf.bean.factory.ParentBeanFactory;
 
 import java.lang.reflect.Field;
 
@@ -14,7 +14,7 @@ public class AutowiredHandler extends AbstractAnnotationHandler<Autowired> {
     @Override
     public void process(Class<?> c, Object obj,Field field) throws Exception {
         field.setAccessible(true);
-        BeanFactory factory = getContext().getFactory();
+        ParentBeanFactory factory = getContext().getFactory();
         field.setAccessible(true);
         Object bean = factory.getBean(field.getType());
         if (bean!=null){

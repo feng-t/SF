@@ -1,15 +1,15 @@
 package com.sf.app;
 
-import com.sf.bean.BeanFactory;
+import com.sf.bean.factory.ParentBeanFactory;
 
 public class ApplicationContext {
-    public BeanFactory factory;
-    public ApplicationContext(BeanFactory factory){
+    public ParentBeanFactory factory;
+    public ApplicationContext(ParentBeanFactory factory){
         this.factory=factory;
 
     }
 
-    public BeanFactory getFactory() {
+    public ParentBeanFactory getFactory() {
         return factory;
     }
     public void load() throws Exception {
