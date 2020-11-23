@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
+@Component
 public @interface Bean {
 
 }

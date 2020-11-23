@@ -24,7 +24,6 @@ public class AnnotationManagement {
                 }
             }
         }
-
         return annotationManagement;
     }
     private final ApplicationContext context;

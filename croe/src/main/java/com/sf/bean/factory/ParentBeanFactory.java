@@ -4,6 +4,7 @@ import com.sf.annotation.Bean;
 import com.sf.annotation.InitCreate;
 import com.sf.bean.Resource;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,11 +15,11 @@ import java.util.stream.Stream;
 
 
 public class ParentBeanFactory {
-
-    private final Set<Resource> resources = ConcurrentHashMap.newKeySet();
-    private final Queue<Resource> preLoad = new PriorityBlockingQueue<>();
-    private final Map<Class<?>, Object> beanMap = new ConcurrentHashMap<>();
-    private final Map<Class<?>, Resource> preLoadResource = new ConcurrentHashMap<>();
+    public final FindAnnotation findAnnotation=new FindAnnotation();
+    public final Set<Resource> resources = ConcurrentHashMap.newKeySet();
+    public final Queue<Resource> preLoad = new PriorityBlockingQueue<>();
+    public final Map<Class<?>, Object> beanMap = new ConcurrentHashMap<>();
+    public final Map<Class<?>, Resource> preLoadResource = new ConcurrentHashMap<>();
 
 
     public ParentBeanFactory(Set<Resource> resourceSet) throws ClassNotFoundException {
@@ -229,4 +230,35 @@ public class ParentBeanFactory {
         }
         return classes;
     }
+    static class FindAnnotation{
+        public Set<Class<?>> set = new HashSet<>();
+        public Queue<Class<?>> queue=new LinkedList<>();
+        public boolean isContains(Class<?> c,Class<? extends Annotation> an){
+            if (c.isAnnotationPresent(an)){
+                set.clear();
+                queue.clear();
+                return true;
+            }else {
+                set.add(c);
+                Annotation[] annotations = c.getDeclaredAnnotations();
+                for (Annotation annotation : annotations) {
+                    if (set.contains(annotation.annotationType())){
+                        return false;
+                    }
+                    queue.offer(annotation.annotationType());
+                }
+                while (!queue.isEmpty()) {
+                    Class<?> peek = queue.poll();
+                    boolean b = isContains(peek, an);
+                    if (b){
+                        return true;
+                    }
+                }
+                set.clear();
+                queue.clear();
+                return false;
+            }
+        }
+    }
+
 }
