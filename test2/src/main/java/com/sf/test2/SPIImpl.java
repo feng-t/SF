@@ -11,6 +11,7 @@ public class SPIImpl implements SPITest {
 
     @Override
     public String toString() {
+
         return "test spi";
     }
 }
