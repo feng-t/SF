@@ -1,4 +1,6 @@
 package com.sf1.asm;
-public interface Account {
-    void operation();
+public class Account {
+    void operation(){
+//        System.out.println("acc");
+    }
 }
