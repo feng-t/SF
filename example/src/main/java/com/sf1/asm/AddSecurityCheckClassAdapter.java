@@ -3,6 +3,7 @@ package com.sf1.asm;
 import com.sun.xml.internal.ws.org.objectweb.asm.ClassAdapter;
 import com.sun.xml.internal.ws.org.objectweb.asm.ClassVisitor;
 import com.sun.xml.internal.ws.org.objectweb.asm.MethodVisitor;
+import com.sun.xml.internal.ws.org.objectweb.asm.Opcodes;
 
 class AddSecurityCheckClassAdapter extends ClassAdapter {
     String enhancedSuperName;
@@ -20,6 +21,7 @@ class AddSecurityCheckClassAdapter extends ClassAdapter {
         enhancedSuperName = name; // 改变父类，这里是”Account”
         super.visit(version, access, enhancedName, signature,
                 enhancedSuperName, interfaces);
+        System.out.println("AddSecurityCheckClassAdapter.visit处理---------------->");
 //        super.visit(version, access, name, signature, superName, interfaces);
 
     }
@@ -28,11 +30,12 @@ class AddSecurityCheckClassAdapter extends ClassAdapter {
     // 给出自定义 MethodVisitor，实际改写方法内容
     public MethodVisitor visitMethod(final int access, final String name,
                                      final String desc, final String signature, final String[] exceptions) {
-        MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
+        MethodVisitor mv=cv.visitMethod(name.equals("operation")?access | Opcodes.ACC_PUBLIC:access, name, desc, signature, exceptions);
         MethodVisitor wrappedMv = mv;
         if (mv != null) {
             if (name.equals("operation")) {
-                wrappedMv = new AddSecurityCheckMethodAdapter(mv);
+                System.out.println("AddSecurityCheckClassAdapter.visitMethod处理operation------------->");
+                wrappedMv = new AddSecurityCheckMethodAdapter(mv,enhancedSuperName);
             }
             else if (name.equals("<init>")) {
                 wrappedMv = new ChangeToChildConstructorMethodAdapter(mv,

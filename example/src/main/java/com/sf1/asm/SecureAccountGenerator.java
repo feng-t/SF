@@ -22,11 +22,11 @@ public class SecureAccountGenerator {
             ClassAdapter classAdapter = new AddSecurityCheckClassAdapter(cw);
             cr.accept(classAdapter, ClassReader.SKIP_DEBUG);
             byte[] data = cw.toByteArray();
-//            String path = Thread.currentThread().getContextClassLoader().getResource(".").getPath() + className+"$0";
-//            File file = new File(path.replaceAll("\\.", "/") + ".class");
-//            FileOutputStream fout = new FileOutputStream(file);
-//            fout.write(data);
-//            fout.close();
+            String path = Thread.currentThread().getContextClassLoader().getResource(".").getPath() + className+"$0";
+            File file = new File(path.replaceAll("\\.", "/") + ".class");
+            FileOutputStream fout = new FileOutputStream(file);
+            fout.write(data);
+            fout.close();
             secureAccountClass = classLoader.defineClassFromClassFile(
                     className+"$0", data);
         }
