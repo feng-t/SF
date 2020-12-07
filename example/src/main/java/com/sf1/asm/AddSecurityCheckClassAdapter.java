@@ -16,11 +16,11 @@ class AddSecurityCheckClassAdapter extends ClassAdapter {
     public void visit(final int version, final int access, final String name,
                       final String signature, final String superName,
                       final String[] interfaces) {
-//        String enhancedName = name + "$0";  // 改变类命名
-//        enhancedSuperName = name; // 改变父类，这里是”Account”
-//        super.visit(version, access, enhancedName, signature,
-//                enhancedSuperName, interfaces);
-        super.visit(version, access, name, signature, superName, interfaces);
+        String enhancedName = name + "$0";  // 改变类命名
+        enhancedSuperName = name; // 改变父类，这里是”Account”
+        super.visit(version, access, enhancedName, signature,
+                enhancedSuperName, interfaces);
+//        super.visit(version, access, name, signature, superName, interfaces);
 
     }
 
@@ -34,10 +34,10 @@ class AddSecurityCheckClassAdapter extends ClassAdapter {
             if (name.equals("operation")) {
                 wrappedMv = new AddSecurityCheckMethodAdapter(mv);
             }
-//            else if (name.equals("<init>")) {
-//                wrappedMv = new ChangeToChildConstructorMethodAdapter(mv,
-//                        enhancedSuperName);
-//            }
+            else if (name.equals("<init>")) {
+                wrappedMv = new ChangeToChildConstructorMethodAdapter(mv,
+                        enhancedSuperName);
+            }
         }
         return wrappedMv;
     }

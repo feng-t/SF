@@ -10,27 +10,25 @@ import java.io.IOException;
 
 public class SecureAccountGenerator {
 
-//    private static AccountGeneratorClassLoader classLoader = new AccountGeneratorClassLoader();
+    private static AccountGeneratorClassLoader classLoader = new AccountGeneratorClassLoader();
 
     private static Class secureAccountClass;
 
-    public Object generateSecureAccount() throws ClassFormatError,
+    public Object generateSecureAccount(String className) throws ClassFormatError,
             InstantiationException, IllegalAccessException, IOException {
         if (null == secureAccountClass) {
-            String className = Account.class.getName();// + "$0";
-            String path = Thread.currentThread().getContextClassLoader().getResource(".").getPath() + className;
-            ClassReader cr = new ClassReader(Account.class.getName());
+            ClassReader cr = new ClassReader(className);
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
             ClassAdapter classAdapter = new AddSecurityCheckClassAdapter(cw);
             cr.accept(classAdapter, ClassReader.SKIP_DEBUG);
             byte[] data = cw.toByteArray();
-            File file = new File(path.replaceAll("\\.", "/") + ".class");
-            FileOutputStream fout = new FileOutputStream(file);
-            fout.write(data);
-            fout.close();
-            secureAccountClass=Account.class;
-//            secureAccountClass = classLoader.defineClassFromClassFile(
-//                    className, data);
+//            String path = Thread.currentThread().getContextClassLoader().getResource(".").getPath() + className+"$0";
+//            File file = new File(path.replaceAll("\\.", "/") + ".class");
+//            FileOutputStream fout = new FileOutputStream(file);
+//            fout.write(data);
+//            fout.close();
+            secureAccountClass = classLoader.defineClassFromClassFile(
+                    className+"$0", data);
         }
         return secureAccountClass.newInstance();
     }

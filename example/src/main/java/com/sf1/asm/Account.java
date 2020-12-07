@@ -1,6 +1,7 @@
 package com.sf1.asm;
 public class Account {
-    void operation(){
+
+    public void operation(){
 //        System.out.println("acc");
     }
 }

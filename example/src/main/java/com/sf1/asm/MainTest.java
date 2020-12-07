@@ -16,40 +16,41 @@ public class MainTest {
 //        Account account = (Account) generator.generateSecureAccount();
 //        account.operation();
 
-        int k=999999999;
+        int k=2;
 
+        Account a1 = (Account) generator.generateSecureAccount("com.sf1.asm.Account");
+
+//        Thread.currentThread().getContextClassLoader()
         printTime(()->{
-            Account a1 = (Account) generator.generateSecureAccount();
             for (int i = 0; i < k; i++) {
                 a1.operation();
             }
-        });
+        },"1");
 
+        Account a2 = new Account();
         printTime(()->{
-            Account a2 = new Account();
             for (int i = 0; i < k; i++) {
                 a2.operation();
             }
-        });
+        },"2");
         Class<?> aClass = Class.forName("com.sf1.asm.Account");
-
+        Account o = (Account) aClass.newInstance();
         printTime(()->{
-            Account o = (Account) aClass.newInstance();
             for (int i = 0; i < k; i++) {
                 o.operation();
             }
-        });
+        },"3");
 
 //        Account account = new Account();
 //        account.operation();
 
     }
 
-    public static void printTime(A a) throws Exception {
+    public static void printTime(A a,String name) throws Exception {
         long start = System.currentTimeMillis();
         a.apply();
         long end = System.currentTimeMillis();
-        System.out.println("执行了："+(end-start)+":ms");
+        System.out.println(name+"执行了："+(end-start)+":ms");
     }
     interface A{
         void apply() throws Exception;
