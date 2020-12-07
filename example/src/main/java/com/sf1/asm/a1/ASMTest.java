@@ -1,11 +1,9 @@
 package com.sf1.asm.a1;
 
-import com.sf.annotation.EnableAOP;
 import com.sf1.asm.Account;
 import com.sun.xml.internal.ws.org.objectweb.asm.ClassAdapter;
 import com.sun.xml.internal.ws.org.objectweb.asm.ClassReader;
 import com.sun.xml.internal.ws.org.objectweb.asm.ClassWriter;
-import com.sun.xml.internal.ws.org.objectweb.asm.Type;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,6 +17,8 @@ public class ASMTest {
         Thread.sleep(1000);
         Account a = new Account();
         a.operation();
+
+
     }
 
     public static Object getBean(String name) throws Exception {
