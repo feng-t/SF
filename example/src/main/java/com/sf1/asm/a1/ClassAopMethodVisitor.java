@@ -1,13 +1,21 @@
 package com.sf1.asm.a1;
 
-import com.sun.xml.internal.ws.org.objectweb.asm.*;
+import com.sf.app.ApplicationContext;
+import com.sun.xml.internal.ws.org.objectweb.asm.AnnotationVisitor;
+import com.sun.xml.internal.ws.org.objectweb.asm.ClassAdapter;
+import com.sun.xml.internal.ws.org.objectweb.asm.ClassVisitor;
+import com.sun.xml.internal.ws.org.objectweb.asm.MethodVisitor;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ClassAopMethodVisitor extends ClassAdapter {
+    private Set<String> annotations= Collections.synchronizedSet(new HashSet<>());
     private String superClassName;
-    String anno;
-
     public ClassAopMethodVisitor(ClassVisitor cv) {
         super(cv);
+
     }
 
     @Override
@@ -19,7 +27,7 @@ public class ClassAopMethodVisitor extends ClassAdapter {
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv=cv.visitMethod(access, name, desc, signature, exceptions);
-        System.out.println(anno);
+
         //根据anno获取注解类型
         return new AOPMethodHandler(name,mv,superClassName);
 
@@ -33,8 +41,7 @@ public class ClassAopMethodVisitor extends ClassAdapter {
      */
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        System.out.println("visitAnnotation :"+desc);
-        anno=desc;
+        annotations.add(desc);
         return super.visitAnnotation(desc, visible);
     }
 

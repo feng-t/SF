@@ -27,7 +27,7 @@ public class ASMTest {
         ClassAdapter adapter = new ClassAopMethodVisitor(cw);
         reader.accept(adapter, ClassReader.SKIP_DEBUG);
         byte[] array = cw.toByteArray();
-        saveFile(name,array);
+//        saveFile(name,array);
 //        Class<?> loadClass = ASMTest.class.getClassLoader().loadClass(name);
         Class<?> loadClass = loader.findClass(name+"$0", array);
         return loadClass.newInstance();

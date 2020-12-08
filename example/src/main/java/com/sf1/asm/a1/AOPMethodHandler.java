@@ -1,28 +1,40 @@
 package com.sf1.asm.a1;
 
-import com.sun.xml.internal.ws.org.objectweb.asm.AnnotationVisitor;
-import com.sun.xml.internal.ws.org.objectweb.asm.MethodAdapter;
-import com.sun.xml.internal.ws.org.objectweb.asm.MethodVisitor;
-import com.sun.xml.internal.ws.org.objectweb.asm.Opcodes;
+import com.sf.app.ApplicationContext;
+import com.sun.xml.internal.ws.org.objectweb.asm.*;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * 处理aop方法，
+ */
 public class AOPMethodHandler extends MethodAdapter {
+    private Set<String> annotations= Collections.synchronizedSet(new HashSet<>());
     String methodName;
     String superName;
+    //通过context获得factory，factory包含所有bean的信息
+    private ApplicationContext applicationContext;
     public AOPMethodHandler(String methodName,MethodVisitor mv,String superName) {
         super(mv);
         this.methodName=methodName;
         this.superName=superName;
+        applicationContext=ApplicationContext.getInstance();
     }
 
     @Override
     public void visitCode() {
+        visitMethodInsn(Opcodes.INVOKESTATIC, MethodAspect.class.getName().replace(".", "/"), "beforeMethod", "()V");
 
-        visitMethodInsn(Opcodes.INVOKESTATIC, MethodAspect.class.getName().replace(".","/"),"beforeMethod","()V");
         super.visitCode();
     }
 
     @Override
     public void visitInsn(int opcode) {
+        if(opcode == Opcodes.ARETURN || opcode == Opcodes.RETURN ) {
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, MethodAspect.class.getName().replace(".","/"),"afterMethod","()V");
+        }
         super.visitInsn(opcode);
     }
 
@@ -48,7 +60,7 @@ public class AOPMethodHandler extends MethodAdapter {
      */
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        System.out.println("AOPMethodHandler:"+desc);
+        annotations.add(desc);
         return super.visitAnnotation(desc, visible);
     }
 }

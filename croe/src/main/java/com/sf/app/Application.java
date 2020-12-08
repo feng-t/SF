@@ -24,7 +24,7 @@ public class Application {
         try {
             path = new FindBeanPath();
             final ParentBeanFactory factory = new DefaultBeanFactory(path.scanPaths(clazz));
-            applicationContext = new ApplicationContext(factory);
+            applicationContext =  ApplicationContext.initInstance(factory);
             scanException(factory);
             //
         } catch (Exception e) {
