@@ -1,5 +1,6 @@
 package com.sf.bean.factory;
 
+import com.sf.annotation.Autowired;
 import com.sf.annotation.Component;
 import com.sf.bean.Resource;
 
@@ -30,15 +31,43 @@ public class DefaultBeanFactory extends ParentBeanFactory{
     }
 
     public List<Resource> getFilter(Class<? extends Annotation> annotation) throws ClassNotFoundException {
-        List<Resource> resources = new ArrayList<>();
-        for (Resource resource : this.resources) {
-            if(findAnnotation.isContains(resource.getBeanClass(),annotation)){
-                resources.add(resource);
+//        annotation.getAnnotationsByType()
+
+        return null;
+    }
+    public static boolean findAnnotation(Class<?> c, Class<? extends Annotation> target){
+        HashSet<Class<? extends Annotation>> set = new HashSet<>();
+        boolean present = c.isAnnotationPresent(target);
+        if (!present){
+            Annotation[] annotations = c.getDeclaredAnnotations();
+            for (Annotation annotation : annotations) {
+                if (findAnnotation(set,annotation.annotationType(),target)){
+                    return true;
+                }
             }
         }
-        return resources;
+        return present;
     }
-
+    public static int i=0;
+    private static boolean findAnnotation(Set<Class<? extends Annotation>> set,Class<? extends Annotation> var,Class<? extends Annotation> target){
+        i++;
+        if (var==target){
+            return true;
+        }
+        Annotation[] annotations = var.getDeclaredAnnotations();
+        for (Annotation annotation : annotations) {
+            Class<? extends Annotation> type = annotation.annotationType();
+            if (type==target){
+                return true;
+            }else if (!set.contains(type)){
+                set.add(type);
+                if (findAnnotation(set,type,target)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 
 }

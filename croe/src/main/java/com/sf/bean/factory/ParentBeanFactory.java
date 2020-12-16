@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 
 public class ParentBeanFactory {
-    public final FindAnnotation findAnnotation=new FindAnnotation();
     public final Set<Resource> resources = ConcurrentHashMap.newKeySet();
     public final Queue<Resource> preLoad = new PriorityBlockingQueue<>();
     public final Map<Class<?>, Object> beanMap = new ConcurrentHashMap<>();
@@ -230,35 +229,6 @@ public class ParentBeanFactory {
         }
         return classes;
     }
-    static class FindAnnotation{
-        public Set<Class<?>> set = new HashSet<>();
-        public Queue<Class<?>> queue=new LinkedList<>();
-        public boolean isContains(Class<?> c,Class<? extends Annotation> an){
-            if (c.isAnnotationPresent(an)){
-                set.clear();
-                queue.clear();
-                return true;
-            }else {
-                set.add(c);
-                Annotation[] annotations = c.getDeclaredAnnotations();
-                for (Annotation annotation : annotations) {
-                    if (set.contains(annotation.annotationType())){
-                        return false;
-                    }
-                    queue.offer(annotation.annotationType());
-                }
-                while (!queue.isEmpty()) {
-                    Class<?> peek = queue.poll();
-                    boolean b = isContains(peek, an);
-                    if (b){
-                        return true;
-                    }
-                }
-                set.clear();
-                queue.clear();
-                return false;
-            }
-        }
-    }
+
 
 }
