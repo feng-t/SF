@@ -14,6 +14,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Stream;
 
 
+@Deprecated
 public class ParentBeanFactory {
     public final Set<Resource> resources = ConcurrentHashMap.newKeySet();
     public final Queue<Resource> preLoad = new PriorityBlockingQueue<>();

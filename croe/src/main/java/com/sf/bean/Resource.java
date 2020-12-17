@@ -4,6 +4,9 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * 应该存放，变量，方法，注解，构造方法
+ */
 public class Resource implements Comparable<Resource>{
     private final URL url;
     private final String className;
