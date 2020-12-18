@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -12,14 +11,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 应该存放，变量，方法，注解，构造方法
  */
-public class Resource implements Comparable<Resource>{
+public class Resource<T> implements Comparable<Resource<T>>{
     private final URL url;
     private final String className;
-    private Class<?> beanClass;
+    private Class<T> beanClass;
+    private T obj;
     private Constructor<?>[] constructors;
     private final int minParameterNum;
     private final int maxParameterNum;
-    private AtomicInteger count=new AtomicInteger(0);
+    private final AtomicInteger count=new AtomicInteger(0);
+    private State state=State.init;
+
 
     public Resource(URL url,String className)  {
         this(url,className,0,0);
@@ -39,9 +41,9 @@ public class Resource implements Comparable<Resource>{
         return constructors;
     }
 
-    public synchronized Class<?> getBeanClass() throws ClassNotFoundException {
+    public synchronized Class<T> getBeanClass() throws ClassNotFoundException {
         if (beanClass==null){
-             beanClass=Class.forName(className);
+            beanClass = (Class<T>) Class.forName(className);
         }
         return beanClass;
     }
@@ -58,6 +60,15 @@ public class Resource implements Comparable<Resource>{
     }
     public int getCount() {
         return count.get();
+    }
+
+
+    public void setObj(T obj) {
+        this.obj = obj;
+    }
+
+    public T getObj() {
+        return obj;
     }
 
     /**
@@ -134,5 +145,14 @@ public class Resource implements Comparable<Resource>{
             }
         }
         return false;
+    }
+
+    enum State {
+        //默认状态
+        init,
+        //准备
+        ready,
+        //完成
+        finish
     }
 }
