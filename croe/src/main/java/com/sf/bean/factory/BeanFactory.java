@@ -1,10 +1,10 @@
 package com.sf.bean.factory;
 
+import com.sf.annotation.AOPHandler;
 import com.sf.bean.Resource;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -13,24 +13,31 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Stream;
 
 public class BeanFactory {
-//    public final Set<Resource> resources = ConcurrentHashMap.newKeySet();
     private final Map<Class<?>,Resource<?>> bean=new ConcurrentHashMap<>();
     public final Queue<Resource<?>> preLoad = new PriorityBlockingQueue<>();
 
-    public BeanFactory(Set<Resource<?>> resourceSet) throws ClassNotFoundException {
+    public BeanFactory(Set<Resource<?>> resourceSet) throws Exception {
         for (Resource<?> resource : resourceSet) {
             bean.put(resource.getBeanClass(),resource);
+            preLoad.add(resource);
         }
         //进行排队
         BeanQueue();
     }
 
-    private void BeanQueue() {
-        Collection<Resource<?>> values = bean.values();
-        for (Resource<?> value : values) {
-
+    private void BeanQueue() throws Exception {
+        while (!preLoad.isEmpty()) {
+            Resource<?> poll = preLoad.poll();
+            if (poll.findClassAnnotation(AOPHandler.class)){
+                Object o = poll.getBeanClass().newInstance();
+                poll.setObj(o);
+                bean.put(poll.getBeanClass(),poll);
+                continue;
+            }
+            //
         }
     }
+
 
     /**
      * 创建bean步骤

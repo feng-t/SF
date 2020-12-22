@@ -63,12 +63,20 @@ public class Resource<T> implements Comparable<Resource<T>>{
     }
 
 
-    public void setObj(T obj) {
-        this.obj = obj;
+    public void setObj(Object obj) {
+        this.obj = (T) obj;
     }
 
     public T getObj() {
         return obj;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public State getState() {
+        return state;
     }
 
     /**
@@ -78,12 +86,10 @@ public class Resource<T> implements Comparable<Resource<T>>{
      */
     @Override
     public int compareTo(Resource o) {
-        final int t = getCount();
-        final int ot = o.getCount();
-        if (t==ot){
+        if (state.ordinal()==o.state.ordinal()){
             return minParameterNum>o.minParameterNum?1:-1;
         }
-        return t>ot?1:-1;
+        return state.ordinal()>o.state.ordinal()?1:-1;
     }
 
     public Set<Field> findFieldsAnnotation(Class<? extends Annotation> target) throws ClassNotFoundException {
@@ -147,10 +153,10 @@ public class Resource<T> implements Comparable<Resource<T>>{
         return false;
     }
 
-    enum State {
+    public enum State {
         //默认状态
         init,
-        //准备
+        //准备--> 就绪状态，如果拿到就绪状态的说明循环依赖
         ready,
         //完成
         finish
