@@ -1,8 +1,10 @@
 package com.sf.bean.factory;
 
 import com.sf.annotation.AOPHandler;
+import com.sf.annotation.EnableAOP;
 import com.sf.bean.Resource;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
@@ -14,6 +16,7 @@ import java.util.stream.Stream;
 
 public class BeanFactory {
     private final Map<Class<?>,Resource<?>> bean=new ConcurrentHashMap<>();
+    private final Map<Class<? extends Annotation>,Resource<?>> annotationMap=new ConcurrentHashMap<>();
     public final Queue<Resource<?>> preLoad = new PriorityBlockingQueue<>();
 
     public BeanFactory(Set<Resource<?>> resourceSet) throws Exception {
@@ -28,14 +31,26 @@ public class BeanFactory {
     private void BeanQueue() throws Exception {
         while (!preLoad.isEmpty()) {
             Resource<?> poll = preLoad.poll();
-            if (poll.findClassAnnotation(AOPHandler.class)){
-                Object o = poll.getBeanClass().newInstance();
-                poll.setObj(o);
-                bean.put(poll.getBeanClass(),poll);
-                continue;
-            }
+            resourceHandler(poll);
+
             //
         }
+    }
+
+    /**
+     *
+     * @param resource
+     */
+    private <T> void resourceHandler(Resource<T> resource) throws Exception {
+        if (resource.findClassAnnotation(AOPHandler.class)){
+            resource.setObj(resource.getBeanClass().newInstance());
+            annotationMap.put(AOPHandler.class,resource);
+            return;
+        }
+        if (resource.findClassAnnotation(EnableAOP.class)){
+            //需要使用aop
+        }
+
     }
 
 
