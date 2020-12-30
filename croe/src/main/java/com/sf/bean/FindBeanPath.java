@@ -13,19 +13,19 @@ import java.util.jar.JarFile;
 
 public class FindBeanPath implements ScanPath {
 
-    public Set<Resource> scanPaths(Class<?> clazz) throws IOException {
+    public Set<Resource<?>> scanPaths(Class<?> clazz) throws IOException {
         String path = clazz.getPackage().getName().replaceAll("\\.", "/");
         return scanPathsToArray(path);
     }
-    public Set<Resource> scanPaths(String pagePaths)throws IOException{
+    public Set<Resource<?>> scanPaths(String pagePaths)throws IOException{
         if (pagePaths==null){
             return new HashSet<>();
         }
         return scanPathsToArray(pagePaths.replaceAll("\\.","/"));
     }
 
-    private Set<Resource> scanPathsToArray(String path) throws IOException {
-        Set<Resource> urls = new HashSet<>();
+    private Set<Resource<?>> scanPathsToArray(String path) throws IOException {
+        Set<Resource<?>> urls = new HashSet<>();
         URL[] packs = getResources(path);
         for (URL pagePath : packs) {
             if (isJarURL(pagePath)) {
@@ -38,12 +38,12 @@ public class FindBeanPath implements ScanPath {
         return urls;
     }
 
-    private Set<Resource> scanPagePath(URL pagePath,String path) throws IOException {
+    private Set<Resource<?>> scanPagePath(URL pagePath,String path) throws IOException {
         return scanFilePath(new File(pagePath.getPath()), new HashSet<>(),path);
     }
 
     //TODO jar
-    private Set<Resource> scanJarPath(URL pagePath,String path) throws IOException {
+    private Set<Resource<?>> scanJarPath(URL pagePath,String path) throws IOException {
 //        final URLConnection conn = pagePath.openConnection();
 //        if (conn instanceof JarURLConnection){
 //            JarURLConnection jarConn = (JarURLConnection) conn;
@@ -56,7 +56,7 @@ public class FindBeanPath implements ScanPath {
     }
 
 
-    private Set<Resource> scanFilePath(File file, Set<Resource> result,String path) throws IOException {
+    private Set<Resource<?>> scanFilePath(File file, Set<Resource<?>> result,String path) throws IOException {
         if (!file.canRead()) {
             throw new IOException("file can't read");
         }

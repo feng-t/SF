@@ -64,6 +64,7 @@ public class Resource<T> implements Comparable<Resource<T>>{
 
 
     public void setObj(Object obj) {
+        setState(State.finish);
         this.obj = (T) obj;
     }
 

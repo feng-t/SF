@@ -1,8 +1,11 @@
 package com.sf.bean.asm;
 
-public class ASMBuilder {
-    public static Object createObj(){
+import com.sf.bean.Resource;
 
-        return null;
+public class ASMBuilder {
+
+
+    public static <T> void createObj(Resource<T> resource) {
+
     }
 }

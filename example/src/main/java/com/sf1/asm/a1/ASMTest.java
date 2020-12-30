@@ -2,7 +2,6 @@ package com.sf1.asm.a1;
 
 import com.sf.app.ApplicationContext;
 import com.sf.bean.FindBeanPath;
-import com.sf.bean.factory.DefaultBeanFactory;
 import com.sf1.asm.Account;
 import com.sun.xml.internal.ws.org.objectweb.asm.ClassAdapter;
 import com.sun.xml.internal.ws.org.objectweb.asm.ClassReader;

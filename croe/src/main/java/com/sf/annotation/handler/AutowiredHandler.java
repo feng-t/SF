@@ -1,7 +1,6 @@
 package com.sf.annotation.handler;
 
 import com.sf.annotation.Autowired;
-import com.sf.bean.factory.ParentBeanFactory;
 
 import java.lang.reflect.Field;
 
