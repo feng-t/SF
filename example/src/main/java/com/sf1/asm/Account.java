@@ -11,7 +11,5 @@ public class Account {
 //        System.out.println("acc");
     }
 
-    public static void main(String[] args) {
 
-    }
 }

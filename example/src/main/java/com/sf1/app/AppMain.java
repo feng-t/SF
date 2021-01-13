@@ -15,12 +15,9 @@ public class AppMain {
 
     public static void main(String[] args){
 //        Application.run(AppMain.class,args);
-
-        Class<Account> aClass = Account.class;
-        boolean b = DefaultBeanFactory.findAnnotation(aClass, Component.class);
-        System.out.println(DefaultBeanFactory.i);
     }
 
+    public static void t(){};
     @Override
     public String toString() {
         return "appMain toString";

@@ -2,6 +2,7 @@ package com.sf1.asm.a1;
 
 import com.sf.app.ApplicationContext;
 import com.sf.bean.FindBeanPath;
+import com.sf.bean.factory.BeanFactory;
 import com.sf1.asm.Account;
 import com.sun.xml.internal.ws.org.objectweb.asm.ClassAdapter;
 import com.sun.xml.internal.ws.org.objectweb.asm.ClassReader;
@@ -14,7 +15,7 @@ public class ASMTest {
     private static ASMClassLoader loader=new ASMClassLoader();
     public static void main(String[] args) throws Exception {
         FindBeanPath path = new FindBeanPath();
-        DefaultBeanFactory factory = new DefaultBeanFactory(path.scanPaths(ASMTest.class));
+        BeanFactory factory =null; //new BeanFactory(path.scanPaths(ASMTest.class));
         ApplicationContext.initInstance(factory);
         Account account = (Account) getBean(Account.class.getName());
         account.operation();
