@@ -1,9 +1,6 @@
 package com.sf1.asm;
 
-import com.sun.xml.internal.ws.org.objectweb.asm.ClassAdapter;
-import com.sun.xml.internal.ws.org.objectweb.asm.ClassVisitor;
-import com.sun.xml.internal.ws.org.objectweb.asm.MethodVisitor;
-import com.sun.xml.internal.ws.org.objectweb.asm.Opcodes;
+import com.sun.xml.internal.ws.org.objectweb.asm.*;
 
 class AddSecurityCheckClassAdapter extends ClassAdapter {
     String enhancedSuperName;
@@ -30,12 +27,13 @@ class AddSecurityCheckClassAdapter extends ClassAdapter {
     // 给出自定义 MethodVisitor，实际改写方法内容
     public MethodVisitor visitMethod(final int access, final String name,
                                      final String desc, final String signature, final String[] exceptions) {
+
         MethodVisitor mv=cv.visitMethod(name.equals("operation")?access | Opcodes.ACC_PUBLIC:access, name, desc, signature, exceptions);
         MethodVisitor wrappedMv = mv;
         if (mv != null) {
             if (name.equals("operation")) {
                 System.out.println("AddSecurityCheckClassAdapter.visitMethod处理operation------------->");
-                wrappedMv = new AddSecurityCheckMethodAdapter(mv,enhancedSuperName);
+                wrappedMv = new AddSecurityCheckMethodAdapter(mv,enhancedSuperName,name);
             }
             else if (name.equals("<init>")) {
                 wrappedMv = new ChangeToChildConstructorMethodAdapter(mv,
@@ -43,5 +41,17 @@ class AddSecurityCheckClassAdapter extends ClassAdapter {
             }
         }
         return wrappedMv;
+    }
+
+    /**
+     * 类注解
+     * @param desc
+     * @param visible
+     * @return
+     */
+    @Override
+    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+        System.out.println("注解");
+        return super.visitAnnotation(desc, visible);
     }
 }

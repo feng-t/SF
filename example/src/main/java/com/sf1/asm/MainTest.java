@@ -3,11 +3,6 @@ package com.sf1.asm;
 public class MainTest {
     public static void main(String[] args) throws Exception {
 
-//        Account as = new As();
-//
-//        as.operation(()->{
-//
-//        });
 
         SecureAccountGenerator generator = new SecureAccountGenerator();
         int k = 2;

@@ -12,6 +12,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 public abstract class BeanFactory {
     Map<Class<?>, Resource<?>> bean = new ConcurrentHashMap<>();
+
     Map<Class<? extends Annotation>, Resource<?>> annotationMap = new ConcurrentHashMap<>();
     public final Queue<Resource<?>> preLoad = new PriorityBlockingQueue<>();
 
@@ -23,7 +24,7 @@ public abstract class BeanFactory {
     }
 
 
-    public abstract Object getBean(Class<?> targetClass);
+    public abstract Object getBean(Class<?> targetClass) throws CreateBeanError;
 
     public abstract List<Class<?>> getBeanClass();
 

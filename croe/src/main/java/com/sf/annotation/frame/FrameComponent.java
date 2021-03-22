@@ -1,4 +1,4 @@
-package com.sf.annotation;
+package com.sf.annotation.frame;
 
 
 import java.lang.annotation.ElementType;
@@ -8,6 +8,5 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Component
-public @interface EnableAOP {
+public @interface FrameComponent {
 }

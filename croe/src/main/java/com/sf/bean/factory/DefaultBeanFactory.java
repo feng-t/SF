@@ -1,52 +1,80 @@
 package com.sf.bean.factory;
 
-import com.sf.annotation.AOPHandler;
-import com.sf.annotation.EnableAOP;
 import com.sf.bean.Resource;
-import com.sf.bean.asm.ASMBuilder;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public abstract class DefaultBeanFactory extends BeanFactory{
+public class DefaultBeanFactory extends BeanFactory {
 
     public DefaultBeanFactory(Set<Resource<?>> resourceSet) throws Exception {
         super(resourceSet);
         //进行排队
-        BeanQueue();
     }
 
-    private void BeanQueue() throws Exception {
-        while (!preLoad.isEmpty()) {
-            Resource<?> poll = preLoad.poll();
-            resourceHandler(poll);
-            //
+    @Override
+    public Object getBean(Class<?> targetClass) throws CreateBeanError {
+        Resource<?> resource = bean.get(targetClass);
+        if (resource == null) {
+            throw new CreateBeanError("resource is null");
         }
+        if (resource.getState()== Resource.State.ready){
+            throw new CreateBeanError("产生循环依赖");
+        }
+        if (resource.getObj() == null) {
+            try {
+                return createBean(resource);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
-    /**
-     *
-     * @param resource
-     */
-    private <T> void resourceHandler(Resource<T> resource) throws Exception {
-        if (createBean(resource)!=null){
-            return;
-        }
-        if (resource.findClassAnnotation(AOPHandler.class)){
-            resource.setObj(resource.getBeanClass().newInstance());
-            annotationMap.put(AOPHandler.class,resource);
-            return;
-        }
-        if (resource.findClassAnnotation(EnableAOP.class)){
-            //需要使用aop
-            ASMBuilder.createObj(resource);
-        }
+    @Override
+    public List<Class<?>> getBeanClass() {
+        return null;
+    }
+
+    @Override
+    public List<Class<?>> getBeanClass(Class<?> c) {
+        return null;
+    }
+
+    @Override
+    public void addResource(Set<Resource<?>> set) {
 
     }
 
-    abstract <T> T createBean(Resource<T> resource);
+
+    public <T> T createBean(Resource<T> resource) throws ClassNotFoundException {
+        Constructor<?>[] constructors = resource.getConstructors();
+        resource.setReady();
+        T obj = null;
+        //普通创建方法
+        if (constructors.length == 1) {
+
+            Class<?>[] types = constructors[0].getParameterTypes();
+            Object[] parameters = new Object[types.length];
+            try {
+                for (int i = 0; i < types.length; i++) {
+                    parameters[i] = getBean(types[i]);
+                }
+                obj = createBean(resource.getBeanClass(), parameters);
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | CreateBeanError e) {
+                e.printStackTrace();
+            }
+        }
+        if (obj!=null){
+            resource.setObj(obj);
+            resource.setFinish();
+        }
+        return obj;
+    }
+
 
 //
 //
@@ -58,6 +86,7 @@ public abstract class DefaultBeanFactory extends BeanFactory{
 
     /**
      * 创建bean
+     *
      * @param beanClass
      * @param parameters
      * @param <T>

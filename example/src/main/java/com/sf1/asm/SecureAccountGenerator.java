@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class SecureAccountGenerator {
 
-    private static AccountGeneratorClassLoader classLoader = new AccountGeneratorClassLoader();
+    private static final AccountGeneratorClassLoader classLoader = new AccountGeneratorClassLoader();
 
     private static Class secureAccountClass;
 
@@ -29,6 +29,7 @@ public class SecureAccountGenerator {
             fout.close();
             secureAccountClass = classLoader.defineClassFromClassFile(
                     className+"$0", data);
+
         }
         return secureAccountClass.newInstance();
     }

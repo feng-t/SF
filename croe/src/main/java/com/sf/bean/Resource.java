@@ -3,8 +3,11 @@ package com.sf.bean;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,23 +20,41 @@ public class Resource<T> implements Comparable<Resource<T>>{
     private Class<T> beanClass;
     private T obj;
     private Constructor<?>[] constructors;
-    private final int minParameterNum;
-    private final int maxParameterNum;
-    private final AtomicInteger count=new AtomicInteger(0);
     private State state=State.init;
+    private Annotation[] classAnnotations;
+    private Map<Method,Annotation[]> methodAnnotations;
+    private Map<Field,Annotation[]> fieldAnnotations;
 
 
     public Resource(URL url,String className)  {
-        this(url,className,0,0);
-    }
-    public Resource(URL url,String className,int maxParameterNum,int minParameterNum) {
         this.url=url;
         this.className=className;
-        this.maxParameterNum=maxParameterNum;
-        this.minParameterNum=minParameterNum;
+        try {
+            this.beanClass=getBeanClass();
+            this.classAnnotations=this.beanClass.getAnnotations();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
 
+    /**
+     * 获取方法的所有注解
+     * @param methodName
+     * @param parameters
+     * @return
+     * @throws ClassNotFoundException
+     * @throws NoSuchMethodException
+     */
+    public Annotation[] getMethodAnnotations(String methodName,Class<?>... parameters) throws ClassNotFoundException, NoSuchMethodException {
+        Method method = getBeanClass().getMethod(methodName, parameters);
+        Annotation[] annotations;
+        if ((annotations=methodAnnotations.get(method))==null){
+            annotations = method.getAnnotations();
+            methodAnnotations.put(method,annotations);
+        }
+        return annotations;
+    }
     public synchronized Constructor<?>[] getConstructors() throws ClassNotFoundException {
         if (constructors==null){
             constructors = getBeanClass().getDeclaredConstructors();
@@ -41,6 +62,7 @@ public class Resource<T> implements Comparable<Resource<T>>{
         return constructors;
     }
 
+    @SuppressWarnings("unchecked")
     public synchronized Class<T> getBeanClass() throws ClassNotFoundException {
         if (beanClass==null){
             beanClass = (Class<T>) Class.forName(className);
@@ -55,16 +77,9 @@ public class Resource<T> implements Comparable<Resource<T>>{
         return url;
     }
 
-    public int addCount(){
-        return count.addAndGet(1);
-    }
-    public int getCount() {
-        return count.get();
-    }
 
-
+    @SuppressWarnings("unchecked")
     public void setObj(Object obj) {
-        setState(State.finish);
         this.obj = (T) obj;
     }
 
@@ -72,24 +87,15 @@ public class Resource<T> implements Comparable<Resource<T>>{
         return obj;
     }
 
-    public void setState(State state) {
-        this.state = state;
-    }
 
-    public State getState() {
-        return state;
-    }
 
     /**
-     * 小的在前
+     * 小的在前,根据state排序
      * @param o
      * @return
      */
     @Override
     public int compareTo(Resource o) {
-        if (state.ordinal()==o.state.ordinal()){
-            return minParameterNum>o.minParameterNum?1:-1;
-        }
         return state.ordinal()>o.state.ordinal()?1:-1;
     }
 
@@ -154,12 +160,33 @@ public class Resource<T> implements Comparable<Resource<T>>{
         return false;
     }
 
+    public boolean isFinish() {
+        return state==State.finish;
+    }
+
     public enum State {
         //默认状态
         init,
-        //准备--> 就绪状态，如果拿到就绪状态的说明循环依赖
+        //准备,等待依赖创建--> 就绪状态，如果拿到就绪状态的说明循环依赖
         ready,
         //完成
-        finish
+        finish;
+
     }
+    private void setState(State state) {
+        this.state = state;
+    }
+    public void setInit(){
+        setState(State.init);
+    }
+    public void setReady(){
+        setState(State.ready);
+    }
+    public void setFinish(){
+        setState(State.finish);
+    }
+    public State getState() {
+        return state;
+    }
+
 }

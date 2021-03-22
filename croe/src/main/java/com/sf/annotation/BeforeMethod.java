@@ -1,7 +1,8 @@
 package com.sf.annotation;
 
+import com.sf.annotation.apply.Component;
+
 import java.lang.annotation.*;
-import java.lang.reflect.Method;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
