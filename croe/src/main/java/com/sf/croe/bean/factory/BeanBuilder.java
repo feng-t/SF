@@ -11,7 +11,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public abstract class BeanBuilder<T> {
     public Set<Resource<?>> resources=new CopyOnWriteArraySet<>();
 
-    protected BeanBuilder(){}
+
+    protected BeanBuilder(Set<Resource<?>> resources){
+        this.resources.addAll(resources);
+    }
 
     public abstract T createBean(Class<T> tClass);
 }
