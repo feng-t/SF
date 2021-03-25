@@ -43,6 +43,10 @@ public class Resource<T> implements Comparable<Resource<T>> {
     private Map<Annotation,List<Method>> annotationByMethod=new ConcurrentHashMap<>();
 
 
+    public Resource(String className) throws ClassNotFoundException {
+        this((Class<T>) Class.forName(className));
+    }
+
     /**
      * 初始化
      * @param beanClass
@@ -71,7 +75,29 @@ public class Resource<T> implements Comparable<Resource<T>> {
     }
 
 
+    public void addBean(T obj){
+        this.cacheBean.add(obj);
+    }
 
+    public List<T> getCacheBean() {
+        return cacheBean;
+    }
+
+    public Map<Annotation, Class<T>> getAnnotationByClass() {
+        return annotationByClass;
+    }
+
+    public Map<Annotation, List<Field>> getAnnotationByField() {
+        return annotationByField;
+    }
+
+    public Map<Annotation, List<Method>> getAnnotationByMethod() {
+        return annotationByMethod;
+    }
+
+    public Map<Constructor<?>, Class<?>[]> getParameterTypes() {
+        return parameterTypes;
+    }
 
     public synchronized Constructor<?>[] getConstructors() throws ClassNotFoundException {
         if (constructors == null) {
@@ -202,9 +228,11 @@ public class Resource<T> implements Comparable<Resource<T>> {
      * 状态
      */
     public static class State {
-        public static final int init = 0;
-        public static final int ready = 1;
-        public static final int finish = 2;
+        //优先级最高，表示基础设施
+        public static final int basis = 0;
+        public static final int init = 1;
+        public static final int ready = 1<<1;
+        public static final int finish = 1<<2;
     }
 
 }
