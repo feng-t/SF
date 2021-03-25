@@ -11,5 +11,15 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Bean {
-     int value() default BeanType.single;
+     /**
+      * 创建bean的类型
+      * @return
+      */
+     int type() default BeanType.single;
+
+     /**
+      * bean的参数
+      * @return
+      */
+     Class<?>[] parameterType() default {};
 }

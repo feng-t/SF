@@ -3,12 +3,18 @@ package com.sf.croe.bean;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * 应该存放，变量，方法，注解，构造方法
+ * bean资源类，表明一个类的所有信息
  */
 public class Resource<T> implements Comparable<Resource<T>> {
 
@@ -17,14 +23,54 @@ public class Resource<T> implements Comparable<Resource<T>> {
      * 三种创建方式，单例，多例，即时，默认单例
      */
     private final List<T> cacheBean=Collections.synchronizedList(new ArrayList<>(1));
+    /**
+     * 构造方法
+     */
     private Constructor<?>[] constructors;
-
+    /**
+     * 每个构造方法所对应参数的类
+     */
+    private Map<Constructor<?>,Class<?>[]>parameterTypes=new ConcurrentHashMap<>();
+    /**
+     * bean的状态
+     */
     private int state = State.init;
+    /**
+     * 注解对应的对象，包括类，方法，参数
+     */
+    private Map<Annotation,Class<T>> annotationByClass=new ConcurrentHashMap<>();
+    private Map<Annotation,List<Field>> annotationByField=new ConcurrentHashMap<>();
+    private Map<Annotation,List<Method>> annotationByMethod=new ConcurrentHashMap<>();
 
 
+    /**
+     * 初始化
+     * @param beanClass
+     */
     public Resource(Class<T> beanClass) {
         this.beanClass = beanClass;
+        this.constructors=beanClass.getConstructors();
+        for (Constructor<?> constructor : this.constructors) {
+            parameterTypes.put(constructor,constructor.getParameterTypes());
+        }
+        for (Annotation annotation : Arrays.stream(beanClass.getAnnotations()).collect(Collectors.toList())) {
+            annotationByClass.put(annotation,beanClass);
+        }
+        for (Field field : beanClass.getFields()) {
+            for (Annotation annotation : field.getAnnotations()) {
+                List<Field> list = annotationByField.getOrDefault(annotation, Collections.synchronizedList(new ArrayList<>()));
+                list.add(field);
+            }
+        }
+        for (Method method : beanClass.getMethods()) {
+            for (Annotation annotation : method.getAnnotations()) {
+                List<Method> methods = annotationByMethod.getOrDefault(annotation, Collections.synchronizedList(new ArrayList<>()));
+                methods.add(method);
+            }
+        }
     }
+
+
 
 
     public synchronized Constructor<?>[] getConstructors() throws ClassNotFoundException {
@@ -34,20 +80,10 @@ public class Resource<T> implements Comparable<Resource<T>> {
         return constructors;
     }
 
-    public Class<T> getBeanClass() throws ClassNotFoundException {
+    public Class<T> getBeanClass() {
         return beanClass;
     }
 
-    /**
-     * 小的在前 TODO 比较方式要改
-     *
-     * @param o
-     * @return
-     */
-    @Override
-    public int compareTo(Resource o) {
-        return state > o.state ? 1 : -1;
-    }
 
     public Set<Field> findFieldsAnnotation(Class<? extends Annotation> target) throws ClassNotFoundException {
         Field[] fields = getBeanClass().getDeclaredFields();
@@ -114,6 +150,23 @@ public class Resource<T> implements Comparable<Resource<T>> {
         return false;
     }
 
+    /**
+     * 创建bean
+     * @param beanClass
+     * @param parameters
+     * @param <T>
+     * @return
+     * @throws NoSuchMethodException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws InstantiationException
+     */
+    public <T> T createBean(Class<T> beanClass, Object... parameters) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<?>[] paraClass = Stream.of(parameters).map(Object::getClass).toArray(Class[]::new);
+        Constructor<T> constructor = beanClass.getDeclaredConstructor(paraClass);
+        constructor.setAccessible(true);
+        return constructor.newInstance(parameters);
+    }
 
     public boolean contains(int state){
         return (this.state&state)==1;
@@ -133,6 +186,16 @@ public class Resource<T> implements Comparable<Resource<T>> {
     }
     public void removeState(int state){
         this.state&=(~state);
+    }
+
+    /**
+     * 小的在前
+     * @param o
+     * @return
+     */
+    @Override
+    public int compareTo(Resource o) {
+        return state > o.state ? 1 : -1;
     }
 
     /**
