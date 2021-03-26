@@ -31,6 +31,7 @@ public abstract class BeanBuilder<T> {
             if (resource.findClassAnnotation(InitAnnotate.class)){
                 resource.addState(Resource.State.basis);
             }
+            preLoad.add(resource);
         }
     }
     /**
